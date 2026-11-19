@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GAIN Clinic Day</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&display=swap">
+<style>
+/* Layout idea: soft editorial illustration on top, one calm task card underneath. Single theme by choice. */
+  /* --shadow is the one elevation used everywhere */
+:root{
+  color-scheme:light;
+  --shadow:0 8px 24px rgba(27,42,74,.10); --bg:#F1F6F4; --surface:#FFFFFF; --ink:#1B2A4A; --muted:#4F5D78; --line:#D5E3DF;
+  --accent:#1F8A8A; --sun:#FFC857; --rose:#F7A8B8; --sky:#BFE6F5;
+  --good:#1E7A4C; --warn:#8A5A00; --bad:#B23A34;
+  --display:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif;
+  --body:"Atkinson Hyperlegible",Verdana,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#F1F6F4;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+main{max-width:760px;margin:0 auto;padding:22px 16px 64px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.05}
+h1{font-size:clamp(46px,12vw,88px);font-weight:800;letter-spacing:-0.03em}
+h2{font-size:30px;font-weight:800;letter-spacing:-0.02em}
+h3{font-size:20px;font-weight:800}
+p{margin:0;max-width:62ch}
+.muted{color:var(--muted)} .small{font-size:14.5px}
+.eyebrow{font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.draft{font-size:14px;color:var(--muted);border:2px dashed var(--line);border-radius:10px;padding:8px 12px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:11px 20px;font-weight:700;box-shadow:var(--shadow);transition:transform .1s,box-shadow .1s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:0 12px 28px rgba(27,42,74,.16)}
+.btn:active{transform:translateY(1px);box-shadow:0 2px 6px rgba(27,42,74,.12)}
+.btn.ghost{background:var(--surface);color:var(--accent);border:1px solid var(--line)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.scene{position:relative;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+.scene svg{display:block;width:100%;height:auto}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.appear{animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.pop{animation:pop .4s ease both;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+
+/* clinic list */
+.slot{display:grid;grid-template-columns:76px 1fr auto;gap:14px;align-items:center;padding:13px 16px;border-top:2px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left}
+.slot:first-child{border-top:0}
+.slot .time{font-family:var(--display);font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.slot.locked{color:var(--muted)} .slot.locked .time{font-weight:500}
+.slot.open{background:#FFF1CC}
+.slot.open:hover .go{transform:translateX(4px)}
+.go{font-weight:700;transition:transform .15s}
+.tag{font-size:13px;border:2px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.sheet{padding:0;overflow:hidden;gap:0}
+
+/* chart */
+.chart-head{background:var(--ink);color:#fff;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.chart-head .big{font-family:var(--display);font-size:30px;font-weight:800;letter-spacing:.01em}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.tile{background:#F7FAF9;border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left;font-weight:700;display:flex;justify-content:space-between;gap:8px;transition:transform .1s}
+.tile:hover{transform:translateY(-2px)}
+.tile.read{background:var(--surface)}
+.tile.on{background:#E3F3F8;border-color:var(--accent)}
+.detail{border:1px solid var(--line);border-radius:12px;padding:14px;background:#E3F3F8;display:grid;gap:8px}
+.field{display:grid;grid-template-columns:130px 1fr;gap:10px}
+.field span:first-child{color:var(--muted)}
+mark{background:var(--sun);color:var(--ink);padding:0 4px;border-radius:4px;font-weight:700}
+.notes{background:#FFF6D6;border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.notes>strong,.notes>.muted{flex-basis:100%}
+.note{display:inline-block;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:15px;font-weight:700;margin:0;text-align:left}
+
+/* chart */
+.ehr{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+.ehr-banner{background:var(--ink);color:#fff;padding:12px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px 18px;font-size:15px;font-variant-numeric:tabular-nums}
+.ehr-banner .nm{grid-column:1/-1;font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:.01em}
+.ehr-banner small{display:block;opacity:.7;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+.ehr-body{display:grid;grid-template-columns:150px 1fr}
+.tabs{display:flex;flex-direction:column;background:#EEF3F2;border-right:1px solid var(--line)}
+.tab{background:none;border:0;border-left:4px solid transparent;text-align:left;padding:11px 12px;font-weight:700;font-size:15px;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--surface);border-left-color:var(--accent);color:var(--accent)}
+.sheetbody{padding:12px 14px;display:grid;gap:14px;font-size:15px;min-height:330px;align-content:start;overflow-x:auto}
+.grp h4{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.line{display:grid;grid-template-columns:minmax(110px,170px) 1fr 20px;gap:8px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid #EEF3F2;padding:7px 4px;font-size:15px;align-items:start}
+.line.free{grid-template-columns:1fr 20px}
+.line.cols{grid-template-columns:minmax(120px,1.7fr) repeat(var(--n),minmax(54px,1fr)) 20px;font-variant-numeric:tabular-nums}
+button.line:hover{background:#F3FAF8}
+.line.pinned{background:#FFF6D6}
+.line .k,.thead{color:var(--muted)}
+.thead{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.line .pin{color:var(--accent);font-weight:700;text-align:right}
+button.note{cursor:pointer}
+.finds{list-style:none;padding:0}
+.finds .ok strong{color:var(--good)} .finds .miss strong{color:var(--bad)}
+@media (max-width:560px){.ehr-body{grid-template-columns:1fr}.tabs{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}.tab{border-left:0;border-bottom:4px solid transparent}.tab[aria-selected="true"]{border-bottom-color:var(--accent)}.line{grid-template-columns:1fr 20px}.line .k{grid-column:1}.line:not(.cols):not(.free) span:nth-child(2){grid-column:1}.line:not(.cols):not(.free) .pin{grid-row:1;grid-column:2}}
+
+/* consultation */
+.meter{background:var(--surface);border-top:1px solid var(--line);padding:8px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+.meter .label{display:flex;gap:8px;font-size:15px}
+.track{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.fill{height:100%;background:var(--accent);transition:width .5s ease}
+.fill.low{background:var(--bad)} .fill.high{background:var(--good)}
+.speech{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 16px;margin:0 18px;position:relative;z-index:1;font-size:19px;font-weight:700;box-shadow:var(--shadow)}
+.speech .by{display:block;font-size:13px;color:var(--muted);font-weight:400}
+.narr{color:var(--muted);font-style:italic}
+.you{background:#E3F3F8;border:1px solid var(--line);border-radius:14px 14px 4px 14px;padding:10px 14px;align-self:flex-end;max-width:92%}
+.you .by{display:block;font-size:13px;color:var(--muted)}
+.options{display:grid;gap:10px}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:left;box-shadow:0 3px 10px rgba(27,42,74,.08);transition:transform .1s,box-shadow .1s,background .1s}
+.opt:hover{background:#F3FAF8;border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow)}
+.chip{display:inline-flex;gap:6px;align-items:center;font-size:14px;font-weight:700;border-radius:999px;padding:3px 12px;border:2px solid currentColor;background:var(--surface)}
+.chip.up{color:var(--good)} .chip.same{color:var(--warn)} .chip.down{color:var(--bad)}
+.why{border-left:4px solid var(--sun);padding:2px 0 2px 12px}
+
+/* label task */
+.labelmock{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px 14px;display:grid;gap:6px;max-width:340px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px}
+.drop{border:2px dashed var(--accent);border-radius:8px;min-height:44px;display:grid;place-items:center;font-weight:700;color:var(--muted);background:#F1F6F4}
+.drop.done{border-style:solid;color:var(--ink);background:var(--sun);font-size:19px}
+.drag{touch-action:none;user-select:none;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-weight:700;box-shadow:0 3px 10px rgba(27,42,74,.08);cursor:grab}
+.drag.moving{cursor:grabbing;box-shadow:8px 8px 0 rgba(27,42,74,.35);position:relative;z-index:5}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* record task */
+.rec{display:grid;gap:8px;border-top:2px solid var(--line);padding-top:12px}
+.rec:first-of-type{border-top:0;padding-top:0}
+.seg{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg button{border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:6px 14px;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg .ask{background:#FDE8EE;margin-left:auto}
+.answer{background:#FDE8EE;border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:8px 12px;align-self:start;justify-self:start}
+.envelope{border:1px solid var(--line);border-radius:8px;background:#FFF6D6;padding:14px 16px;max-width:320px;position:relative}
+.envelope:before{content:"";position:absolute;top:10px;right:12px;width:30px;height:36px;border:1px solid var(--line);background:var(--rose);border-radius:3px}
+.envelope strong{font-size:19px;display:block}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:8px}
+.card.high{background:#DFF3E6} .card.mid{background:#FFF6D6} .card.low{background:#FBE3E0}
+ul{margin:0;padding-left:20px;display:grid;gap:6px}
+@media (max-width:480px){
+  .slot{grid-template-columns:58px 1fr} .slot .end{grid-column:2}
+  .field{grid-template-columns:1fr;gap:0}
+  .speech{margin:0 8px;font-size:17px}
+  .seg .ask{margin-left:0}
+}
+
+/* structure: title, map, clinics */
+main{--clinic:#E0A526}
+.eyebrow{border-left:4px solid var(--clinic);padding-left:8px}
+.title{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:6vh 0 4vh}
+.map>.eyebrow{border:0;padding:0}
+.lead{font-size:20px}
+.btn.big{font-size:20px;padding:15px 36px}
+.switch{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:4px;gap:4px}
+.switch button{border:0;background:none;padding:7px 16px;border-radius:999px;font-weight:700;font-size:15px}
+.switch button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.plain{background:none;border:0;padding:0;text-align:left;align-self:flex-start;line-height:0}
+.link{color:var(--accent);font-weight:700;line-height:1.5}
+.between{justify-content:space-between}
+.map{background:#DCEBE7;border-radius:22px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:0}
+.map>.eyebrow{align-self:flex-start;margin-bottom:10px}
+.rooms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
+.room{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;text-align:left;box-shadow:var(--shadow);transition:transform .15s;border-top:5px solid var(--c)}
+.room:hover{transform:translateY(-3px)}
+.room.dev,.room.locked{background:#F7FAF9;box-shadow:none;color:var(--muted)}
+.room strong{font-size:16px;line-height:1.25}
+.room.main{flex-direction:row;align-items:center;gap:16px;width:min(100%,460px);background:var(--t);border:2px solid var(--ink);padding:14px 18px}
+.maintext{display:flex;flex-direction:column;gap:6px}
+.room .big{font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:-.01em}
+.corridor{width:76%;height:34px;border-top:5px dotted var(--accent);margin-top:14px}
+.corridor:after,.stub{content:"";display:block;width:0;height:34px;border-left:5px dotted var(--accent);margin:0 auto}
+.stub{height:22px}
+.here{background:var(--accent);color:#fff;font-weight:700;font-size:14px;border-radius:999px;padding:7px 18px}
+.pill{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;background:var(--surface);color:var(--muted)}
+.pill.req{background:var(--ink);color:#fff;border-color:var(--ink)}
+.strip{background:#F3FAF8;border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.ph{background:#FFF1CC;border:1px dashed #C99A1E;border-radius:6px;padding:1px 7px;font-size:13.5px;color:#5C4500;display:inline-block}
+.ph b{text-transform:uppercase;letter-spacing:.05em;font-size:11.5px}
+.ph.block{display:block;padding:8px 12px;max-width:none}
+.summary{white-space:pre-wrap;font-family:var(--body);font-size:16px;margin:0}
+@media (max-width:620px){.rooms{grid-template-columns:1fr 1fr}.corridor{width:50%}}
+.gamename{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:-.01em;color:var(--accent);margin-top:6px}
+.title h1{letter-spacing:.02em}
+.slot.open.done{background:#EAF5EC}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pair .labelmock{max-width:none}
+.opt.check[aria-pressed="true"]{border-color:var(--accent);background:#E3F3F8}
+.slipnote{background:#FBE3E0;border-left:4px solid var(--bad);padding:10px 12px;border-radius:0 10px 10px 0;max-width:none}
+@media (max-width:480px){.pair{grid-template-columns:1fr}}
+.gamename{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:-.01em;color:var(--accent);margin-top:6px}
+.title h1{letter-spacing:.02em}
+.slot.open.done{background:#EAF5EC}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pair .labelmock{max-width:none}
+.opt.check[aria-pressed="true"]{border-color:var(--accent);background:#E3F3F8}
+.slipnote{background:#FBE3E0;border-left:4px solid var(--bad);padding:10px 12px;border-radius:0 10px 10px 0;max-width:none}
+.timebar,.prog{display:grid;gap:6px}
+.timebar .fill,.prog .fill{background:var(--clinic)}
+.how{margin:0;padding-left:22px;display:grid;gap:10px}
+@media (max-width:480px){.pair{grid-template-columns:1fr}}
+
+/* v6 look: navy shell, palette taken from the logo, scenes that glow */
+:root{--bg:#0F1830;--accent:#5BCEFA;--rose:#F5A9B8}
+body{background:radial-gradient(1100px 620px at 85% -8%,rgba(245,169,184,.20),transparent 62%),radial-gradient(900px 560px at -5% 5%,rgba(91,206,250,.20),transparent 60%),var(--bg);background-attachment:fixed;color:#EAF0FB}
+main{--muted:#A9B6D3;--link:#7FDAFB;color:#EAF0FB}
+.panel,.card,.ehr,.notes,.speech,.strip,.room,.envelope,.labelmock,.opt,.tile,.you,.answer,.summary,.meter,.detail{--muted:#4F5D78;--link:#0B6A8C;color:#1B2A4A}
+.link,.go{color:var(--link)}
+.tab[aria-selected="true"],.line .pin{color:var(--link)}
+.btn{background:var(--accent);color:#0E1830;box-shadow:0 8px 22px rgba(91,206,250,.28)}
+.btn.ghost{background:transparent;color:var(--link);border:1.5px solid currentColor;box-shadow:none}
+.btn.ghost[aria-pressed="true"]{background:rgba(127,218,251,.16)}
+.scene{border:0;border-radius:22px;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 26px 70px rgba(91,206,250,.24)}
+.meter{border-top:0}
+.meter .track{background:#D5E3DF}
+.track{background:rgba(255,255,255,.18)}
+.card .track,.panel .track{background:#D5E3DF}
+.map{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.here{background:var(--rose);color:#0F1830}
+.room.dev,.room.locked{background:#E7ECF4}
+.switch{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
+.switch button{color:#EAF0FB}
+.switch button[aria-pressed="true"]{background:#fff;color:#0F1830}
+.draft{border-color:rgba(255,255,255,.28)}
+.drop{background:#F1F6F4}
+.title h1{font-size:clamp(84px,22vw,150px);line-height:.9;background:linear-gradient(100deg,#5BCEFA 5%,#F5A9B8 45%,#FFFFFF 62%,#F5A9B8 80%,#5BCEFA);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gamename{color:var(--rose)}
+.card .card{box-shadow:none}
+details.card>summary{cursor:pointer;font-weight:700;font-family:var(--display);font-size:19px}
+details.card[open]>summary{margin-bottom:6px}
+.hand{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.art{position:relative}
+.hot{position:absolute;left:7%;top:80%;width:46px;height:46px;border-radius:50%;border:3px solid #E0527A;background:rgba(245,169,184,.35);animation:pulse 1.3s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.25);opacity:.6}}
+.blink{opacity:0;animation:blink 5.5s infinite}
+@keyframes blink{0%,95.5%,100%{opacity:0}96.5%,98.5%{opacity:1}}
+.breathe{animation:breathe 4.6s ease-in-out infinite}
+@keyframes breathe{50%{transform:translateY(-2.5px)}}
+#app.enter{animation:rise .34s ease both}
+.sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.line{grid-template-columns:minmax(110px,170px) 1fr auto}
+.line.free{grid-template-columns:1fr auto}
+.line.cols{grid-template-columns:minmax(120px,1.7fr) repeat(var(--n),minmax(54px,1fr)) auto}
+.line .pin{font-size:12.5px;border:1px solid currentColor;border-radius:999px;padding:1px 8px;white-space:nowrap;font-weight:700}
+.thead span:last-child{visibility:hidden}
+@media (max-width:640px){.scene.pin{position:sticky;top:6px;z-index:4}.line{grid-template-columns:1fr auto}.line.cols{min-width:470px}}
+
+/* facilitator mode */
+.btn.alt{background:var(--rose);box-shadow:0 8px 22px rgba(245,169,184,.28)}
+main.fac{max-width:1000px;font-size:19px}
+main.fac .opt{font-size:20px}
+main.fac .speech{font-size:23px}
+.voterow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:stretch}
+.vote{border:1.5px solid var(--line);border-radius:14px;background:#fff;color:#1B2A4A;font-weight:700;padding:0 14px;min-width:104px}
+.facask{display:grid;gap:12px}
+.facq{background:#EAF7FD;border-left:5px solid #5BCEFA;padding:10px 14px;border-radius:0 12px 12px 0;color:#1B2A4A;max-width:none}
+details.whyd>summary{cursor:pointer;font-weight:700;color:var(--link)}
+.phase{display:flex;gap:8px;flex-wrap:wrap}
+.phase span{padding:6px 14px;border-radius:999px;border:1.5px solid rgba(255,255,255,.3);font-weight:700;font-size:15px}
+.phase .on{background:#fff;color:#0F1830;border-color:#fff}
+.title{padding:1vh 0 3vh;gap:11px}
+.title h1{font-size:clamp(76px,17vw,124px)}
+.ribbon{background:#FFC857;color:#0F1830;font-weight:700;font-size:13.5px;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:6px 18px;max-width:none}
+.faces{display:flex;justify-content:center;margin-top:4px}
+.face{width:92px;height:92px;border-radius:50%;overflow:hidden;border:4px solid #fff;margin-left:-16px;box-shadow:0 10px 26px rgba(3,8,24,.45)}
+.face:first-child{margin-left:0}
+.face svg{display:block;width:100%;height:100%}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:660px;margin-top:6px}
+.modecard{text-align:left;border:0;border-radius:20px;padding:18px 20px;display:grid;gap:6px;align-content:start;background:var(--accent);color:#0F1830;box-shadow:0 12px 30px rgba(91,206,250,.28);transition:transform .15s}
+.modecard.alt{background:var(--rose);box-shadow:0 12px 30px rgba(245,169,184,.28)}
+.modecard:hover{transform:translateY(-3px)}
+.modecard strong{font-family:var(--display);font-size:25px;font-weight:800;letter-spacing:-.01em}
+.modecard .small{font-weight:700}
+@media (max-width:560px){.modes{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div id="live" class="sr" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+var INK = "#1B2A4A";
+var CHART = [
+  { k: "demo", name: "Demographics", groups: [
+    { h: "Identity", rows: [
+      { id: "d1", l: "Legal name", v: "A. Doyle" }, { id: "d2", l: "Known as", v: "Jamie" }, { id: "d3", l: "Pronouns", v: "he/him" },
+      { id: "d4", l: "Gender marker on record", v: "F" }, { id: "d5", l: "Date of birth", v: "14 Mar 2002 (24 y)" } ] },
+    { h: "Contact", rows: [
+      { id: "d6", l: "Address", v: "Family home, Naas, Co. Kildare. Lives with parents." }, { id: "d7", l: "Mobile", v: "Own phone. Voicemail permitted." },
+      { id: "d8", l: "Next of kin", v: "Mother" }, { id: "d11", l: "Occupation", v: "Bike mechanic, shift work" }, { id: "d9", l: "Correspondence preference", v: "Not recorded" }, { id: "d10", l: "GP", v: "Dr M. Byrne, Naas" } ] } ] },
+  { k: "meds", name: "Medicines", groups: [
+    { h: "Current", rows: [
+      { id: "m1", l: "Testosterone gel", v: "\u00A7Dose and start date to be supplied", note: "On testosterone gel, month 8" }, { id: "m2", l: "Supply", v: "Monthly prescription from this clinic" },
+      { id: "m3", l: "Other medicines", v: "None recorded" } ] },
+    { h: "Safety", rows: [ { id: "m4", l: "Allergies", v: "None known" }, { id: "m5", l: "Smoking", v: "Non-smoker" } ] } ] },
+  { k: "res", name: "Results", groups: [
+    { h: "Bloods and observations", head: ["Test", "Aug 26", "Nov 26", "Trend"], foot: "Values and reference ranges to be supplied by the clinical lead.", rows: [
+      { id: "r1", c: ["Total testosterone", "\u00A7value", "\u00A7value", "Lower than August"], note: "Testosterone lower than in August" },
+      { id: "r2", c: ["Haematocrit", "\u00A7value", "\u00A7value", "Stable"], note: "Haematocrit stable" },
+      { id: "r3", c: ["Liver function", "\u00A7value", "\u00A7value", "Stable"], note: "Liver function stable" },
+      { id: "r4", c: ["Lipids", "\u00A7value", "\u00A7value", "Stable"], note: "Lipids stable" },
+      { id: "r5", c: ["Blood pressure", "\u00A7value", "\u00A7value", "Stable"], note: "Blood pressure stable" },
+      { id: "r6", c: ["Weight", "\u00A7value", "\u00A7value", "Stable"], note: "Weight stable" } ] } ] },
+  { k: "rx", name: "Prescriptions", groups: [
+    { h: "Dispensing record", head: ["Issued", "Collected", "Days", ""], rows: [
+      { id: "p1", c: ["04 Aug 2026", "05 Aug 2026", "1", ""], note: "August prescription collected next day" },
+      { id: "p2", c: ["01 Sep 2026", "12 Sep 2026", "11", ""], note: "September prescription collected 11 days late" },
+      { id: "p3", c: ["29 Sep 2026", "16 Oct 2026", "17", ""], note: "October prescription collected 17 days late" },
+      { id: "p4", c: ["27 Oct 2026", "Not collected", "20+", ""], note: "Latest prescription not collected" } ] } ] },
+  { k: "let", name: "Letters", groups: [
+    { h: "Correspondence", rows: [
+      { id: "l1", t: "20 Jan 2026 · GP referral. “Thank you for seeing A. Doyle for ongoing review…” Legal name used throughout.", note: "Referral uses the legal name only" },
+      { id: "l2", t: "06 Aug 2026 · Clinic letter to GP. Copy posted to the patient at the home address, addressed in the legal name.", note: "Clinic letters posted home in the legal name" },
+      { id: "l3", t: "09 Nov 2026 · Appointment text sent to mobile, using the legal first name.", note: "Appointment texts use the legal name" } ] } ] },
+  { k: "notes", name: "Notes", groups: [
+    { h: "Clinical and admin notes", rows: [
+      { id: "n1", t: "04 Aug 2026 · Month 5 review. Feels well. Voice deepening, pleased. Mild facial acne, using a wash. Mood good. Plan: continue gel, bloods at month 8.", note: "August: well, mild acne, mood good" },
+      { id: "n2", t: "Reception · Labels and appointment texts print from the legal record unless a clinician changes it.", note: "Labels print from the legal record" },
+      { id: "n3", t: "12 May 2026 · Month 2 review. Gel technique checked. No concerns.", note: "May: gel technique checked" },
+      { id: "n4", t: "20 Oct 2026 · Phone. Rang to move today’s appointment around a work shift.", note: "Moved appointment for work" } ] } ] }
+];
+var KEYS = {
+  name:  { ids: ["d2"], label: "He is known as Jamie" },
+  pron:  { ids: ["d3"], label: "His pronouns are he/him" },
+  home:  { ids: ["d9", "d6", "l2"], label: "Post goes to his parents’ house and no preference is recorded" },
+  level: { ids: ["r1"], label: "Testosterone has fallen since August" },
+  late:  { ids: ["p2", "p3", "p4"], label: "Recent prescriptions collected late or not at all" },
+  label: { ids: ["n2", "l3"], label: "Labels and texts print from the legal record" }
+};
+var MAXPINS = 7, NOTE = {};
+CHART.forEach(function (t) { t.groups.forEach(function (g) { g.rows.forEach(function (r) { NOTE[r.id] = r.note || (r.l + ": " + r.v); }); }); });
+
+var TALK = {
+  label: { num: 3, title: "The label", scene: "Jamie holds up the sticker reception gave him.", patient: "They printed my old name on this. Again.",
+    options: [
+      { t: "“I’m sorry about that. I’ll get it corrected today and tell you what I’ve done.”", d: 1, r: "Jamie nods. “Okay. Thanks.”", why: "A brief apology, a concrete action and follow-through." },
+      { t: "“Oh no, I’m so, so sorry. I feel terrible. I can’t believe we did that to you.”", d: 0, r: "“It’s fine, honestly. Don’t worry about it.” Jamie is now reassuring you.", why: "A long apology shifts the emotional work to the patient." },
+      { t: "“The system has to use your legal name, I’m afraid.”", d: -1, r: "Jamie puts the sticker in his pocket and says nothing.", why: "This defends the system without checking what can be changed." } ] },
+  rx: { num: 5, title: "The prescription", draft: "Which documents must match the legal name, and what a clinic can change, is to be supplied for each jurisdiction.", scene: "You finish the routine review. Jamie hesitates before asking.", patient: "Will my prescription still have the old name on it?",
+    options: [
+      { t: "\u201cIt may need to match what the pharmacy holds. I\u2019ll check what we can change. Is collecting it a problem?\u201d", d: 1, r: "“Kind of. They read the name out at the counter.” He looks at the floor.", why: "Honest about the limits, and the open question invites the real issue." },
+      { t: "“Yes, it has to be the legal name. That’s the rule.”", d: 0, r: "Jamie shrugs. “Fine.”", why: "This may be accurate, but it closes the conversation." },
+      { t: "\u201cDon\u2019t worry about that at all. I\u2019ll make sure it says Jamie on absolutely everything from now on, I promise.\u201d", d: 0, later: true, r: "Jamie smiles for the first time today.", why: "A promise you may not be able to keep. The cost arrives after the visit." } ] }
+};
+var CALLS = {
+  jamie:   { t: "Call “Jamie”.", d: 1, r: "Jamie stands straight away. His shoulders drop a little as he walks over.", why: "The chart already held the answer, and you found it." },
+  surname: { t: "Call “Doyle?” by surname only.", d: 0, r: "Jamie looks up, unsure, then follows you in. He watches you closely.", why: "No harm done, but it signals uncertainty. A reasonable fallback when the record is unclear." },
+  legal:   { t: "Call the full name printed at the top of the chart.", d: -1, r: "There is a pause. Heads turn. Jamie gets up without a word.", why: "Reading the legal name aloud discloses his history to the whole waiting room." }
+};
+var OPENING = "Grand, mostly. Voice is still dropping, which is great. Skin’s a bit of a mess. Work’s been mad, so I’m wrecked a lot of the time. I ran out of gel for a bit last month, but sure, it’s fine. Oh, and my mam wants me to ask about the flu jab.";
+var PROBES = [
+  { k: "voice", t: "The voice changes", r: "“It cracked in a meeting last week. I didn’t even mind.”" },
+  { k: "skin", t: "His skin", r: "“It’s my chin, mostly. The wash helps a bit.”" },
+  { k: "tired", t: "Feeling wrecked", r: "“Probably work. Though it has been worse the last few weeks, now you say it.”" },
+  { k: "gel", t: "Running out of gel", r: "“I just didn’t get to the pharmacy. It’s… a bit awkward going in there.”" },
+  { k: "flu", t: "The flu jab", r: "“She just worries. I’ll get it at work.”" }
+];
+var REC = [
+  { k: "name", label: "Name on chart and labels", opts: ["A. Doyle", "Jamie Doyle"], ans: "“Jamie. On everything you can.”" },
+  { k: "letters", label: "Name on letters to his home", opts: ["A. Doyle", "Jamie Doyle", "J. Doyle"], ans: "“Letters go to my parents’ house. Could the envelope just say J. Doyle?”" },
+  { k: "phone", label: "Name used on calls and texts", opts: ["A. Doyle", "Jamie"], ans: "“Jamie’s fine on the phone. It’s my own mobile.”" }
+];
+var ENDINGS = {
+  high: { line: "Actually, yeah. I’ve been putting off collecting my prescriptions because of the name thing. I’ve missed a good few doses.",
+          head: "Jamie told you about the missed doses.", text: "You can now address the missed doses and the collection problem together. Trust made the clinical picture complete." },
+  mid:  { line: "Collecting prescriptions is a bit awkward. But it’s fine.",
+          head: "Jamie gave you a hint, then left.", text: "The cue was there and easy to miss. With a little more trust he might have told you why it is awkward." },
+  low:  { line: "No. Everything’s fine.",
+          head: "Jamie said everything was fine.", text: "Jamie has been missing doses because of the name read out at the pharmacy. You did not find out, and he may not come back." }
+};
+var CLINICS = [
+  { k: "foundation", name: "Foundation Clinic", sub: "Names, pronouns, health records and asking sensitive questions", color: "#E0A526", tint: "#FFF1CC", status: "Required", outcomes: ["Use a patient\u2019s name and pronouns accurately, and confirm them when the record is unclear.", "Review and correct health records and correspondence together with the patient.", "Introduce sensitive questions with a reason and with permission, and ask only what is relevant.", "Recover from a mistake briefly and keep the visit centred on the patient."], cases: [
+    { k: "jamie", time: "09:00", who: "Jamie", what: "The name on the record", mins: 10, note: "This case involves misgendering and the risk of being outed at home.", play: true, aims: ["Find name, pronoun and correspondence details in a chart.", "Apologise for and correct a records error.", "Agree how each kind of correspondence should be addressed."] },
+    { k: "ash", time: "09:30", who: "Ash", what: "Pronouns and a first history", mins: 8, note: "This case involves questions about sex, gender and anatomy.", play: true, after: "jamie", aims: ["Ask for name and pronouns when the record is silent.", "Explain the limits of a form and record the patient\u2019s choice.", "Signpost sensitive questions and ask only what is relevant."] },
+    { k: "maya", time: "10:00", who: "Maya", what: "Sensitive questions with someone else in the room", mins: 10, note: "This case involves misgendering, a family member in the room and a disclosure about medicines.", play: true, after: "ash", aims: ["Confirm identity safely across mismatched records.", "Recover after misgendering someone.", "Create a private moment when a relative is present."] } ] },
+  { k: "hormone", name: "Hormone management", sub: "Acne, self-administration, breakthrough bleeding and dose changes on testosterone", color: "#1F8A8A", tint: "#DDF1EF", status: "Opens after Foundation", locked: true, cases: [
+    { k: "leo", time: "09:00", who: "Leo", what: "Acne on testosterone" },
+    { k: "rowan", time: "09:30", who: "Rowan", what: "Learning to self-administer" },
+    { k: "dara", time: "10:00", who: "Dara", what: "Breakthrough bleeding and a dose change" } ] },
+  { k: "screening", name: "Screening and preventive care", sub: "Cervical and breast screening, binding", color: "#3F8FC4", tint: "#E3F3F8", status: "In development", dev: true, cases: [
+    { time: "09:00", who: "", what: "A cervical screening conversation" }, { time: "09:30", who: "", what: "A breast screening conversation" }, { time: "10:00", who: "", what: "A question about binding" } ] },
+  { k: "surgical", name: "Surgical follow-up", sub: "Reviews after gender-affirming surgery", color: "#D9688A", tint: "#FDE8EE", status: "In development", dev: true, cases: [
+    { time: "09:00", who: "", what: "A routine post-operative review" }, { time: "09:30", who: "", what: "A more complex review" } ] },
+  { k: "mental", name: "Mental health", sub: "One presentation related to gender care, one that is not", color: "#5DAE7E", tint: "#E4F2E0", status: "In development", dev: true, cases: [
+    { time: "09:00", who: "", what: "A change in mood unrelated to gender care" }, { time: "09:30", who: "", what: "A change in mood related to gender care" } ] }
+];
+var KEYMSG = {
+  ash: ["Ask for name and pronouns when the record does not tell you.", "When a form cannot hold the answer, say so, explain what the field is for, and let the patient decide.", "Before sensitive questions: signpost, give the reason, ask permission, use their words.", "Ask about bodies only when today\u2019s care depends on the answer."],
+  maya: ["Confirm identity with details that do not change when a name does.", "When you slip: correct it, apologise briefly, move on.", "Explain record errors plainly and offer to act on them.", "Make time alone a routine part of the visit, so no one has to ask for it."],
+  jamie: ["Read the whole chart. Names and pronouns are clinical information, and so are collection dates.", "Introduce yourself by name and role, then confirm his.", "Apologise briefly, then act.", "Be honest about where a legal name must still appear, and agree a plan for every kind of correspondence."] };
+var P = { done: {}, plays: {}, juris: "ie" };
+try { var saved = JSON.parse(localStorage.getItem("clinicday.v1") || "null"); if (saved && saved.done) P = saved; } catch (e) {}
+P.ends = P.ends || {}; P.last = P.last || {};
+function persist() { try { localStorage.setItem("clinicday.v1", JSON.stringify(P)); } catch (e) {} }
+function clinic(k) { return CLINICS.filter(function (c) { return c.k === k; })[0]; }
+function seenBefore() { return (P.plays[S.kase || "jamie"] || 0) > 0; }
+
+var START = 40, UNIT = 12, S, labelMsg = "", pinMsg = "";
+
+/* ---------- helpers ---------- */
+function h(tag, attrs) {
+  var e = document.createElement(tag), i, k, c;
+  attrs = attrs || {};
+  for (k in attrs) {
+    if (k === "onclick") e.addEventListener("click", attrs[k]);
+    else if (k === "text") e.textContent = attrs[k];
+    else if (k === "svg") e.innerHTML = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  for (i = 2; i < arguments.length; i++) { c = arguments[i]; if (c == null) continue; e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); }
+  return e;
+}
+function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function fresh() {
+  return { view: "title", clinic: "foundation", kase: "jamie", i: 0, ans: {}, out: {}, ord: {}, form: { name: -1, title: -1, pron: -1 }, fasked: {}, ids: [], fast: false, tab: "demo", pins: [], c1: null, intro: null, label: null, rx: null, c4: null, probes: [], probed: false, phase: 0, labelDone: false,
+           asked: {}, rec: { name: 0, letters: 0, phone: 0 }, orders: { intro: shuffle([0, 1, 2]), label: shuffle([0, 1, 2]), rx: shuffle([0, 1, 2]) } };
+}
+function pinned(id) { return S.pins.indexOf(id) >= 0; }
+function found(k) { return KEYS[k].ids.some(pinned); }
+function introOptions() {
+  var n = found("name"), p = found("pron"), a;
+  if (n && p) a = { t: "\u201cHi Jamie, I\u2019m [your name], the nurse practitioner. Jamie, he/him: have I got that right?\u201d", r: "“Yeah. That’s right.” He sits back a little.", why: "You gave your name and role, then confirmed his. Confirming what the chart says shows him you read it." };
+  else if (n) a = { t: "“Hi Jamie, I’m [your name], the nurse practitioner today. What pronouns do you use?”", r: "“He/him. Thanks for asking.”", why: "You gave your name and role and asked openly. His pronouns were on the chart, so confirming them would have been stronger still." };
+  else a = { t: "“Hi, I’m [your name], the nurse practitioner today. What name and pronouns would you like me to use?”", r: "“Jamie. He/him.” He looks surprised to be asked.", why: "An open question recovers what you did not bring from the chart. Both answers were recorded there." };
+  a.d = 1;
+  return [a,
+    { t: "“Before we start, what are your preferred pronouns?”", d: 0, r: "“He/him.” A pause. “It’s on my chart, I think.”", why: "Asking beats assuming, but you gave no name or role of your own, and “preferred” can suggest his pronouns are optional." },
+    { t: "\u201cSorry, it says A. Doyle on my list here, but you answered to something else out there. Which is it?\u201d", d: -1, r: "Jamie breathes out slowly. “Jamie.”", why: "This makes the record’s error his problem to explain, again, before you have even introduced yourself." }];
+}
+function probeOutcome() {
+  var gel = S.probes.indexOf("gel") >= 0, clue = found("late") || found("level");
+  if (gel) return { d: 1, did: "Followed up: " + probeNames() + ".", why: "Running out of a daily medicine was the detail with clinical consequences." + (clue ? " Your chart notes pointed the same way." : " The prescription record and the lower testosterone level on the chart both pointed to it.") };
+  return { d: 0, did: "Followed up: " + probeNames() + ".", why: "Each of these mattered to Jamie, but running out of gel was the one with clinical consequences. The prescription record and the lower testosterone level on the chart both pointed to it." };
+}
+function probeNames() { return PROBES.filter(function (p) { return S.probes.indexOf(p.k) >= 0; }).map(function (p) { return p.t.toLowerCase(); }).join(" and "); }
+function recOutcome() {
+  if (S.c4 === "leave") return { d: -1, did: "Left the record for reception to sort out.", r: "Jamie says nothing. The same label will print at his next visit.", why: "The error recurs, and the earlier apology loses its value." };
+  var nameOk = S.rec.name === 1, lettersOk = S.rec.letters === 2 && S.asked.letters;
+  if (nameOk && lettersOk) return { d: 1, did: "Asked Jamie what he wanted, then updated the chart, letters and calls.", r: "“Thanks for asking about the post,” says Jamie.", why: "Name use extends beyond the consultation. Correspondence can out someone at home." };
+  if (nameOk) return { d: 0, did: "Updated the chart name without settling how letters should be addressed.", r: "“Thanks,” says Jamie.", why: "This fixes the clinic, but a letter to his parents’ house could still out him. Only Jamie can tell you what is safe." };
+  return { d: -1, did: "Saved the record with the legal name still on the chart.", r: "Jamie watches you close the chart and says nothing.", why: "The record still carries the name he asked you not to use." };
+}
+function deltas() {
+  var a = [];
+  if (S.kase !== "jamie") return scriptDeltas();
+  if (S.c1) a.push(CALLS[S.c1].d);
+  if (S.intro != null) a.push(introOptions()[S.intro].d);
+  if (S.label != null) a.push(TALK.label.options[S.label].d);
+  if (S.probed) a.push(probeOutcome().d);
+  if (S.rx != null) a.push(TALK.rx.options[S.rx].d);
+  if (S.c4) a.push(recOutcome().d);
+  return a;
+}
+function trust() { return deltas().reduce(function (t, d) { return Math.max(0, Math.min(100, t + d * UNIT)); }, START); }
+function tier(t) { return t >= 76 ? "high" : t >= 40 ? "mid" : "low"; }
+function word(t) { return { high: "At ease", mid: "Guarded", low: "Closed off" }[tier(t)]; }
+function brokenPromise() { return S.rx != null && TALK.rx.options[S.rx].later; }
+function go(view) { if (isFac() && (view === "debrief" || view === "cdebrief")) view = "fdebrief"; S.view = view; render(true); }
+function chip(d) {
+  return d > 0 ? h("span", { class: "chip up", text: "▲ Trust up" })
+       : d < 0 ? h("span", { class: "chip down", text: "▼ Trust down" })
+       : h("span", { class: "chip same", text: "▬ No change" });
+}
+function draftNote() { return h("p", { class: "draft", text: "Pilot build. Patients and dialogue are drafts awaiting clinical and community review. Items marked Draft are not yet supplied. Nothing you do here is recorded or sent anywhere." }); }
+function meter() {
+  if (P.hide) return null;
+  var t = trust();
+  return h("div", { class: "meter", role: "img", "aria-label": "Trust: " + word(t) },
+    h("div", { class: "label" }, h("span", { class: "muted", text: "Trust" }), h("strong", { text: word(t) })),
+    h("div", { class: "track" }, h("div", { class: "fill " + tier(t), style: "width:" + Math.max(6, t) + "%" })));
+}
+function notesCard(editable) {
+  var box = h("div", { class: "notes" }, h("strong", { text: "Your notes  " + S.pins.length + "/" + MAXPINS }));
+  if (!S.pins.length) box.appendChild(h("span", { class: "muted small", text: editable ? "Tap any line in the chart to note it. Only your notes come with you into the room." : "You brought no notes from the chart." }));
+  S.pins.forEach(function (id) {
+    box.appendChild(editable ? h("button", { class: "note", title: "Remove from notes", onclick: function () { S.pins.splice(S.pins.indexOf(id), 1); pinMsg = ""; render(false); }, text: NOTE[id] + "  ×" })
+                             : h("span", { class: "note", text: NOTE[id] }));
+  });
+  return box;
+}
+
+function ph(text) { return P.clean ? h("span", {}) : h("span", { class: "ph" }, h("b", { text: "Draft" }), " " + text); }
+function val(s) { return s.charAt(0) === "\u00A7" ? (P.clean ? document.createTextNode("\u2014") : ph(s.slice(1))) : document.createTextNode(s); }
+function logoSVG(s) { return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 160 160" role="img" aria-label="GAIN logo"><defs><clipPath id="lg' + s + '"><path d="M62 22h36a8 8 0 0 1 8 8v24h24a8 8 0 0 1 8 8v36a8 8 0 0 1-8 8h-24v24a8 8 0 0 1-8 8H62a8 8 0 0 1-8-8v-24H30a8 8 0 0 1-8-8V62a8 8 0 0 1 8-8h24V30a8 8 0 0 1 8-8z"/></clipPath></defs><rect width="160" height="160" rx="36" fill="#1B2A4A"/><g clip-path="url(#lg' + s + ')"><rect y="22" width="160" height="24" fill="#5BCEFA"/><rect y="45" width="160" height="24" fill="#F5A9B8"/><rect y="68" width="160" height="24" fill="#fff"/><rect y="91" width="160" height="24" fill="#F5A9B8"/><rect y="114" width="160" height="26" fill="#5BCEFA"/></g></svg>'; }
+function doorSVG(c, state) {
+  var s = '<svg viewBox="0 0 64 80" width="64" height="80" aria-hidden="true"><rect x="6" y="4" width="52" height="74" rx="6" fill="' + (state === "open" ? "#FFF6DD" : "#C4DCD6") + '"/>';
+  if (state === "open") s += '<path d="M10 8L40 14V76L10 74Z" fill="' + c + '"/><circle cx="34" cy="46" r="3" fill="#fff"/><path d="M44 30h10M44 40h10M44 50h6" stroke="#E0C98A" stroke-width="3" stroke-linecap="round"/>';
+  else { s += '<rect x="10" y="8" width="44" height="68" rx="4" fill="' + c + '" opacity="' + (state === "dev" ? ".45" : "1") + '"/><rect x="18" y="16" width="28" height="20" rx="4" fill="#fff" opacity=".75"/><circle cx="46" cy="46" r="3" fill="#fff"/>';
+    if (state === "locked") s += '<rect x="24" y="48" width="16" height="13" rx="3" fill="#1B2A4A"/><path d="M27 48v-4a5 5 0 0 1 10 0v4" fill="none" stroke="#1B2A4A" stroke-width="3"/>'; }
+  return s + "</svg>";
+}
+/* ---------- drawings (soft editorial: no outlines, layered tone) ---------- */
+var HEADS = { round: "M134 198C134 124 266 124 266 198C266 252 238 286 200 286C162 286 134 252 134 198Z", long: "M139 194C139 120 261 120 261 194C261 250 240 298 200 298C160 298 139 250 139 194Z", square: "M131 198C131 126 269 126 269 198C269 244 250 284 200 284C150 284 131 244 131 198Z" };
+var THEME = {
+  jamie: { w1: "#EEF6F3", w2: "#D2E7E1", g1: "#DDF2F8", g2: "#B5DCEA", sun: "#FFE2A0", hill: "#9CCFB8", c1: "#5F9D96", c2: "#74B0A9" },
+  ash:   { w1: "#FCF1E2", w2: "#F2D8BB", g1: "#FFE3B8", g2: "#F7B98A", sun: "#FF9F68", hill: "#C98F6A", c1: "#B5704F", c2: "#CC8A68" },
+  maya:  { w1: "#E9ECF9", w2: "#C9D1EE", g1: "#33447A", g2: "#1B2A4A", sun: "#F4F1DE", hill: "#44568F", c1: "#5C5FA3", c2: "#7679BB" }
+};
+var CAST = {
+  jamie: { skin: "#E3A97E", shade: "#D2946A", ear: "#D69870", ear2: "#C98A60", neck: "#CF9066", neck2: "#B87A52", line: "#B87A52", lip: "#8C4A3A", hair: "#4A2E1C", hair2: "#5E3B25", hair3: "#7A5236", style: "short", top: "#EDAE3A", tshade: "#D9951F", deep: "#C98718", kind: "hoodie" },
+  ash:   { skin: "#A9714B", shade: "#955F3C", ear: "#9C6642", ear2: "#8A5836", neck: "#99643F", neck2: "#84522F", line: "#7E4D2C", lip: "#6E3327", hair: "#1E1512", hair2: "#2E211B", hair3: "#463229", style: "curly", top: "#6FAE8E", tshade: "#559573", deep: "#447D5F", kind: "crew", glasses: true, head: "square", ex: 7.4, ey: 8.6, bw: 6 },
+  maya:  { skin: "#EBC09A", shade: "#DBA982", ear: "#E0B28C", ear2: "#D2A07A", neck: "#DDB08A", neck2: "#C99870", line: "#BF8E66", lip: "#A8485A", hair: "#3A2A2A", hair2: "#4A3636", hair3: "#6A5050", style: "bob", top: "#9A5C8F", tshade: "#7F4877", deep: "#FFF6DD", kind: "vneck", earrings: true, head: "long", ex: 8.4, ey: 9.2, bw: 3.6, lash: true },
+  orla:  { skin: "#EBC09A", shade: "#DBA982", ear: "#E0B28C", ear2: "#D2A07A", neck: "#DDB08A", neck2: "#C99870", line: "#BF8E66", lip: "#9C4A4A", hair: "#8A5A34", hair2: "#9C6A40", hair3: "#B8855A", style: "bob", top: "#6DA7D9", tshade: "#4F8CC2", deep: "#3F78AC", kind: "crew", head: "long", bw: 3.8, lash: true }
+};
+function character(c, mood) {
+  var brow = { low: "M158 196Q170 188 184 187M216 187Q230 188 242 196", mid: "M157 192Q171 186 185 190M215 190Q229 186 243 192", high: "M157 189Q171 181 185 187M215 187Q229 181 243 189" }[mood];
+  var mouth = { low: "M186 262Q200 254 214 262", mid: "M186 259Q200 263 214 259", high: "M180 254Q200 274 220 254" }[mood];
+  var ex = c.ex || 8.2, ey = c.ey || 9.6, bw = c.bw || 4.6;
+  var px = mood === "low" ? -3 : 0, py = mood === "low" ? 4 : 0, s = "";
+  if (c.style === "bob") s += '<path d="M118 232C100 118 148 70 206 72C268 74 302 122 284 234C286 272 278 304 262 322H140C124 304 114 270 118 232Z" fill="' + c.hair + '"/>';
+  s += '<path d="M52 480C60 392 114 352 172 336Q200 364 228 336C286 352 340 392 348 480Z" fill="' + c.top + '"/><path d="M228 336C286 352 340 392 348 480H246C256 424 248 370 228 336Z" fill="' + c.tshade + '"/>';
+  if (c.kind === "hoodie") s += '<path d="M150 346C148 304 252 304 250 346C238 328 162 328 150 346Z" fill="' + c.deep + '"/><path d="M170 334Q200 368 230 334L224 318H176Z" fill="#B87812"/>';
+  if (c.kind === "vneck") s += '<path d="M172 334L200 404L228 334Q200 350 172 334Z" fill="' + c.deep + '"/>';
+  s += '<path d="M178 266V326Q200 346 222 326V266Z" fill="' + c.neck + '"/><path d="M178 284Q200 304 222 284V266H178Z" fill="' + c.neck2 + '"/>';
+  if (c.kind === "crew") s += '<path d="M170 334Q200 362 230 334" fill="none" stroke="' + c.deep + '" stroke-width="9" stroke-linecap="round"/>';
+  s += '<ellipse cx="133" cy="214" rx="11" ry="17" fill="' + c.ear + '"/><ellipse cx="267" cy="214" rx="11" ry="17" fill="' + c.ear2 + '"/>';
+  if (c.earrings) s += '<circle cx="132" cy="236" r="5" fill="#E0A526"/><circle cx="268" cy="236" r="5" fill="#E0A526"/>';
+  s += '<path d="' + HEADS[c.head || "round"] + '" fill="' + c.skin + '"/>';
+  s += '<g clip-path="url(#jh-' + (c.head || "round") + ')"><path d="M222 116H280V296H218C246 262 250 176 222 116Z" fill="' + c.shade + '" opacity=".6"/><ellipse cx="158" cy="240" rx="18" ry="11" fill="#EE8E7E" opacity=".38"/><ellipse cx="242" cy="240" rx="18" ry="11" fill="#EE8E7E" opacity=".32"/></g>';
+  if (c.style === "short") s += '<path d="M126 210C108 126 152 78 208 80C268 82 296 132 274 212C272 186 266 168 256 156C236 172 210 176 188 168C176 176 160 176 146 166C136 178 130 192 126 210Z" fill="' + c.hair + '"/><path d="M146 166C150 124 196 98 244 116C262 124 268 142 256 156C236 172 210 176 188 168C176 176 160 176 146 166Z" fill="' + c.hair2 + '"/><path d="M160 132Q196 104 240 120Q204 114 172 140Z" fill="' + c.hair3 + '"/>';
+  if (c.style === "bob") s += '<path d="M130 206C124 138 168 102 214 104C254 106 276 138 270 200C262 166 244 146 216 140C190 154 158 172 130 206Z" fill="' + c.hair2 + '"/><path d="M168 126Q204 106 244 124Q206 118 176 138Z" fill="' + c.hair3 + '"/>';
+  if (c.style === "curly") { [[146, 164, 26], [168, 130, 30], [204, 112, 32], [240, 122, 30], [262, 154, 25], [134, 190, 17], [270, 186, 15]].forEach(function (k) { s += '<circle cx="' + k[0] + '" cy="' + k[1] + '" r="' + k[2] + '" fill="' + c.hair + '"/>'; });
+    [[176, 122, 12], [214, 108, 12], [246, 130, 10], [152, 156, 9]].forEach(function (k) { s += '<circle cx="' + k[0] + '" cy="' + k[1] + '" r="' + k[2] + '" fill="' + c.hair3 + '" opacity=".55"/>'; }); }
+  s += '<path d="' + brow + '" stroke="' + c.hair + '" stroke-width="' + bw + '" stroke-linecap="round" fill="none"/>';
+  s += '<ellipse cx="170" cy="214" rx="' + ex + '" ry="' + ey + '" fill="#2A1B14"/><ellipse cx="230" cy="214" rx="' + ex + '" ry="' + ey + '" fill="#2A1B14"/><circle cx="' + (173 + px) + '" cy="' + (210 + py) + '" r="2.8" fill="#fff"/><circle cx="' + (233 + px) + '" cy="' + (210 + py) + '" r="2.8" fill="#fff"/>';
+  s += mood === "low" ? '<path d="M160 206Q170 201 181 206M219 206Q230 201 240 206" stroke="' + c.line + '" stroke-width="5" fill="none" stroke-linecap="round"/>' : '<path d="M160 205Q170 197 181 205M219 205Q230 197 240 205" stroke="' + c.line + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+  if (c.lash) s += '<path d="M160 209l-7-4M240 209l7-4" stroke="#2A1B14" stroke-width="2.6" stroke-linecap="round"/>';
+  s += '<g class="blink"><ellipse cx="170" cy="213" rx="11" ry="12" fill="' + c.skin + '"/><ellipse cx="230" cy="213" rx="11" ry="12" fill="' + c.skin + '"/><path d="M161 216Q170 221 180 216M220 216Q230 221 240 216" stroke="' + c.line + '" stroke-width="3" fill="none" stroke-linecap="round"/></g>';
+  if (c.glasses) s += '<g fill="none" stroke="#1B2A4A" stroke-width="4"><rect x="150" y="196" width="40" height="34" rx="12"/><rect x="210" y="196" width="40" height="34" rx="12"/><path d="M190 210h20M150 208l-14-4M250 208l14-4"/></g>';
+  s += '<path d="M200 224Q195 237 200 240Q204 242 208 239" stroke="' + c.line + '" stroke-width="3.2" fill="none" stroke-linecap="round"/>';
+  if (mood === "high") s += '<path d="M180 254Q200 274 220 254Q200 262 180 254Z" fill="#fff"/>';
+  s += '<path d="' + mouth + '" stroke="' + c.lip + '" stroke-width="4.2" fill="none" stroke-linecap="round"/>';
+  if (c.kind === "hoodie") s += '<path d="M188 342V390M212 342V390" stroke="#FBE7B8" stroke-width="5" stroke-linecap="round"/><circle cx="188" cy="394" r="5" fill="#FBE7B8"/><circle cx="212" cy="394" r="5" fill="#FBE7B8"/>';
+  if (mood === "low") s += '<rect x="112" y="434" width="178" height="40" rx="20" fill="' + c.tshade + '"/><ellipse cx="116" cy="454" rx="17" ry="15" fill="' + c.ear + '"/><rect x="110" y="402" width="178" height="40" rx="20" fill="' + c.top + '"/><ellipse cx="288" cy="422" rx="17" ry="15" fill="' + c.skin + '"/>';
+  return s;
+}
+function roomSVG(k, who, companion) {
+  who = who || "jamie";
+  var T = THEME[who] || THEME.jamie, name = who.charAt(0).toUpperCase() + who.slice(1), dx = companion ? -70 : 0;
+  var s = '<svg viewBox="0 0 720 360" role="img" aria-label="' + name + " sitting across the desk, " + { high: "relaxed and smiling", mid: "watchful", low: "arms crossed, looking away" }[k] + (companion ? ", with her sister beside her" : "") + '">';
+  s += '<defs><linearGradient id="rw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + T.w1 + '"/><stop offset="1" stop-color="' + T.w2 + '"/></linearGradient><linearGradient id="win" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + T.g1 + '"/><stop offset="1" stop-color="' + T.g2 + '"/></linearGradient>';
+  s += Object.keys(HEADS).map(function (k) { return '<clipPath id="jh-' + k + '"><path d="' + HEADS[k] + '"/></clipPath>'; }).join("") + "</defs>";
+  s += '<rect width="720" height="360" fill="url(#rw)"/><path d="M430 0H560L360 360H230Z" fill="#fff" opacity=".28"/>';
+  s += '<rect x="528" y="34" width="160" height="156" rx="12" fill="#fff"/><rect x="536" y="42" width="144" height="140" rx="6" fill="url(#win)"/><circle cx="646" cy="72" r="18" fill="' + T.sun + '"/><path d="M536 150Q580 120 620 146T680 138V182H536Z" fill="' + T.hill + '" opacity=".8"/><rect x="605" y="42" width="6" height="140" fill="#fff"/><rect x="536" y="108" width="144" height="6" fill="#fff"/><rect x="520" y="190" width="176" height="10" rx="4" fill="#fff"/>';
+  if (!companion) s += '<path d="M560 190h26l-4-22h-18z" fill="#E88F7C"/><path d="M573 168C560 150 562 132 572 122C580 136 580 152 573 168ZM573 168C586 154 596 150 604 152C600 164 588 170 573 168ZM573 168C560 158 550 156 544 160C550 170 562 172 573 168Z" fill="#5DAE7E"/>';
+  s += '<rect x="52" y="52" width="132" height="164" rx="10" fill="#C4DCD6"/><rect x="46" y="46" width="132" height="164" rx="10" fill="#fff"/><rect x="62" y="64" width="100" height="14" rx="7" fill="#F7A8B8"/><rect x="62" y="90" width="72" height="14" rx="7" fill="#8ED1F0"/><rect x="62" y="116" width="100" height="14" rx="7" fill="#FBD27A"/><rect x="62" y="142" width="56" height="14" rx="7" fill="#B8E0B0"/><circle cx="146" cy="176" r="14" fill="#E4F2EE"/>';
+  if (companion) s += '<rect x="474" y="150" width="176" height="230" rx="38" fill="' + T.c1 + '"/><rect x="484" y="160" width="156" height="214" rx="30" fill="' + T.c2 + '"/><g transform="translate(432,26) scale(.66)">' + character(CAST.orla, "mid") + "</g>";
+  s += '<rect x="' + (246 + dx) + '" y="104" width="228" height="280" rx="46" fill="' + T.c1 + '"/><rect x="' + (258 + dx) + '" y="116" width="204" height="260" rx="38" fill="' + T.c2 + '"/>';
+  s += '<g transform="translate(' + (200 + dx) + ',-44) scale(.8)"><g class="pop"><g class="breathe">' + character(CAST[who], k) + "</g></g></g>";
+  s += '<rect y="330" width="720" height="30" fill="#BF8452"/><rect y="330" width="720" height="7" fill="#D9A572"/>';
+  s += '<ellipse cx="660" cy="334" rx="30" ry="6" fill="#A66E40" opacity=".5"/><rect x="640" y="292" width="38" height="42" rx="8" fill="#fff"/><rect x="640" y="292" width="38" height="12" rx="6" fill="#E4F2EE"/><path d="M678 304q16 4 0 20" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>';
+  s += '<path d="M36 336l12-22h96l12 22z" fill="#fff"/><rect x="60" y="320" width="56" height="5" rx="2.5" fill="#C4DCD6"/><rect x="60" y="328" width="36" height="4" rx="2" fill="#C4DCD6"/>';
+  return s + "</svg>";
+}
+function person(x, o) {
+  var up = o.stand ? -36 : 0, s = '<g' + (o.stand ? ' class="pop"' : "") + ">", sh = o.shade, gx = o.gx || 0, gy = o.gy || 0, m = o.mood || 0;
+  if (o.stand) s += '<rect x="' + (x - 20) + '" y="250" width="19" height="96" rx="9" fill="' + o.legs + '"/><rect x="' + (x + 1) + '" y="250" width="19" height="96" rx="9" fill="' + o.legs2 + '"/>';
+  else s += '<rect x="' + (x - 24) + '" y="282" width="48" height="24" rx="11" fill="' + o.legs + '"/><rect x="' + (x - 21) + '" y="296" width="18" height="50" rx="8" fill="' + o.legs + '"/><rect x="' + (x + 3) + '" y="296" width="18" height="50" rx="8" fill="' + o.legs2 + '"/>';
+  s += '<ellipse cx="' + (x - 12) + '" cy="348" rx="13" ry="6" fill="#2F3A52"/><ellipse cx="' + (x + 13) + '" cy="348" rx="13" ry="6" fill="#2F3A52"/>';
+  s += '<g transform="translate(0,' + up + ')">';
+  s += '<rect x="' + (x - 36) + '" y="236" width="15" height="54" rx="7.5" fill="' + sh + '"/><rect x="' + (x + 21) + '" y="236" width="15" height="54" rx="7.5" fill="' + sh + '"/>';
+  s += '<circle cx="' + (x - 28.5) + '" cy="292" r="7.5" fill="' + o.skin + '"/><circle cx="' + (x + 28.5) + '" cy="292" r="7.5" fill="' + o.skin2 + '"/>';
+  s += '<path d="M' + (x - 27) + " 240Q" + x + " 220 " + (x + 27) + " 240L" + (x + 24) + " 294H" + (x - 24) + 'Z" fill="' + o.top + '"/><path d="M' + (x + 6) + " 228Q" + (x + 20) + " 232 " + (x + 27) + " 240L" + (x + 24) + " 294H" + (x + 8) + 'Z" fill="' + sh + '" opacity=".7"/>';
+  s += '<rect x="' + (x - 7) + '" y="218" width="14" height="16" rx="5" fill="' + o.skin2 + '"/>';
+  if (o.hair === "long") s += '<path d="M' + (x - 26) + " 236V200a26 27 0 0 1 52 0V236Q" + x + " 246 " + (x - 26) + ' 236Z" fill="' + o.hc + '"/>';
+  s += '<ellipse cx="' + x + '" cy="202" rx="21" ry="23" fill="' + o.skin + '"/><path d="M' + (x + 6) + " 180a21 23 0 0 1 0 44q10-22 0-44z" + '" fill="' + o.skin2 + '" opacity=".7"/>';
+  if (o.hair === "long") s += '<path d="M' + (x - 22) + " 204C" + (x - 24) + " 172 " + (x + 24) + " 172 " + (x + 22) + " 204C" + (x + 14) + " 188 " + (x - 2) + " 186 " + (x - 10) + " 184C" + (x - 16) + " 190 " + (x - 20) + " 196 " + (x - 22) + ' 204Z" fill="' + o.hc + '"/>';
+  else s += '<path d="M' + (x - 23) + " 204C" + (x - 28) + " 168 " + (x + 28) + " 168 " + (x + 23) + " 204C" + (x + 18) + " 190 " + (x + 8) + " 186 " + (x - 6) + " 188C" + (x - 14) + " 190 " + (x - 20) + " 196 " + (x - 23) + ' 204Z" fill="' + o.hc + '"/><path d="M' + (x - 12) + " 184Q" + x + " 174 " + (x + 14) + " 182Q" + x + " 180 " + (x - 12) + ' 184Z" fill="#fff" opacity=".22"/>';
+  if (o.hair === "bun") s += '<circle cx="' + x + '" cy="172" r="10" fill="' + o.hc + '"/>';
+  s += '<ellipse cx="' + (x - 11) + '" cy="212" rx="5" ry="3" fill="#EE8E7E" opacity=".4"/><ellipse cx="' + (x + 11) + '" cy="212" rx="5" ry="3" fill="#EE8E7E" opacity=".4"/>';
+  s += '<circle cx="' + (x - 8 + gx) + '" cy="' + (205 + gy) + '" r="2.7" fill="#2A1B14"/><circle cx="' + (x + 8 + gx) + '" cy="' + (205 + gy) + '" r="2.7" fill="#2A1B14"/>';
+  s += '<path d="M' + (x - 6) + " 215q6 " + m + ' 12 0" fill="none" stroke="#8C4A3A" stroke-width="2.4" stroke-linecap="round"/>';
+  return s + "</g></g>";
+}
+function waitingSVG(called) {
+  var xs = [262, 372, 482, 592], s = '<svg viewBox="0 0 720 380" role="img" aria-label="A clinic waiting room with four people seated">';
+  s += '<defs><linearGradient id="ww" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EEF6F3"/><stop offset="1" stop-color="#D2E7E1"/></linearGradient></defs>';
+  s += '<rect width="720" height="380" fill="url(#ww)"/><path d="M560 0H700L520 352H380Z" fill="#fff" opacity=".25"/><rect y="346" width="720" height="34" fill="#B5D2CC"/><rect y="346" width="720" height="5" fill="#fff" opacity=".5"/>';
+  s += '<rect x="26" y="98" width="170" height="140" rx="12" fill="#C4DCD6"/><rect x="34" y="106" width="154" height="124" rx="8" fill="#FFF6DD"/><rect x="18" y="232" width="186" height="14" rx="7" fill="#BF8452"/><rect x="18" y="232" width="186" height="5" rx="2.5" fill="#D9A572"/>';
+  s += '<rect x="66" y="160" width="62" height="72" rx="8" fill="#B5DCEA"/><rect x="74" y="168" width="46" height="34" rx="4" fill="#fff" opacity=".7"/><rect x="142" y="196" width="26" height="36" rx="6" fill="#F7A8B8"/>';
+  s += '<rect x="40" y="56" width="142" height="30" rx="15" fill="#1B2A4A"/><text x="111" y="77" text-anchor="middle" font-family="Bricolage Grotesque,Arial,sans-serif" font-weight="800" font-size="16" letter-spacing="1.5" fill="#fff">RECEPTION</text>';
+  s += '<circle cx="429" cy="80" r="34" fill="#C4DCD6"/><circle cx="427" cy="78" r="32" fill="#fff"/><path d="M427 78v-20M427 78l-15-6" fill="none" stroke="#1B2A4A" stroke-width="4" stroke-linecap="round"/><circle cx="427" cy="78" r="3.5" fill="#E88F7C"/>';
+  s += '<rect x="250" y="120" width="100" height="0"/><rect x="536" y="50" width="96" height="70" rx="8" fill="#fff"/><path d="M544 112l22-30l16 18l12-10l30 22z" fill="#9CCFB8"/><circle cx="612" cy="68" r="8" fill="#FFE2A0"/>';
+  s += '<ellipse cx="678" cy="350" rx="30" ry="6" fill="#9DBDB6"/><path d="M660 318h36l-5 32h-26z" fill="#E88F7C"/><path d="M678 318C664 290 664 262 676 244C688 264 690 292 678 318ZM678 318C694 296 706 288 716 290C712 306 698 318 678 318ZM678 318C662 300 650 296 642 300C648 314 662 320 678 318Z" fill="#5DAE7E"/><path d="M678 318C672 292 672 268 676 244C682 270 682 294 678 318Z" fill="#7BC796"/>';
+  xs.forEach(function (x) { s += '<ellipse cx="' + x + '" cy="352" rx="46" ry="7" fill="#9DBDB6"/><rect x="' + (x - 30) + '" y="318" width="6" height="32" rx="3" fill="#4E857F"/><rect x="' + (x + 24) + '" y="318" width="6" height="32" rx="3" fill="#4E857F"/><rect x="' + (x - 33) + '" y="184" width="66" height="124" rx="16" fill="#5F9D96"/><rect x="' + (x - 27) + '" y="190" width="54" height="112" rx="12" fill="#74B0A9"/><rect x="' + (x - 38) + '" y="302" width="76" height="16" rx="8" fill="#5F9D96"/>'; });
+  var look = called === "legal" ? 3 : 0, rest = called === "legal" ? 0 : 2;
+  s += person(xs[0], { skin: "#F2C9A5", skin2: "#E0B28C", hair: "bun", hc: "#C9CED6", top: "#F7A8B8", shade: "#E58CA0", legs: "#6B5B95", legs2: "#5A4B82", gx: look, gy: rest });
+  s += person(xs[1], { skin: "#8D5B3F", skin2: "#774A32", hair: "long", hc: "#2B1D16", top: "#8ED1F0", shade: "#6DB7DA", legs: "#3A4660", legs2: "#2F3A52", gx: look, gy: rest });
+  s += person(xs[2], { skin: "#E3A97E", skin2: "#D2946A", hair: "short", hc: "#4A2E1C", top: "#EDAE3A", shade: "#D9951F", legs: "#3D5A80", legs2: "#334C6D", stand: !!called,
+    mood: called === "jamie" ? 5 : called === "legal" ? -5 : 0, gy: called === "jamie" ? 0 : called ? 2 : 3, gx: called ? -2 : 0 });
+  s += person(xs[3], { skin: "#C98A5E", skin2: "#B5774C", hair: "short", hc: "#1F1A17", top: "#B8E0B0", shade: "#98C98F", legs: "#5A6B4A", legs2: "#4A5A3A", gx: -look, gy: rest });
+  if (called === "legal") s += '<path d="M446 122l-10-10M518 122l10-10M482 114v-14" fill="none" stroke="#E88F7C" stroke-width="4" stroke-linecap="round"/>';
+  return s + "</svg>";
+}
+function pharmacySVG() {
+  var s = '<svg viewBox="0 0 720 210" role="img" aria-label="A pharmacy counter with a prescription bag waiting">';
+  s += '<rect width="720" height="210" fill="#E6F1EE"/><path d="M300 0H430L330 150H200Z" fill="#fff" opacity=".3"/>';
+  s += '<rect x="36" y="58" width="390" height="8" rx="4" fill="#C4DCD6"/><rect x="36" y="110" width="390" height="8" rx="4" fill="#C4DCD6"/>';
+  [[60, 26, "#F7A8B8"], [100, 18, "#8ED1F0"], [140, 28, "#FBD27A"], [200, 22, "#B8E0B0"], [250, 28, "#F7A8B8"], [310, 16, "#8ED1F0"], [360, 28, "#FBD27A"],
+   [70, 80, "#B8E0B0"], [130, 72, "#FBD27A"], [180, 80, "#8ED1F0"], [240, 70, "#F7A8B8"], [300, 80, "#B8E0B0"], [350, 74, "#8ED1F0"]].forEach(function (b) {
+    var base = b[1] < 58 ? 58 : 110; s += '<rect x="' + b[0] + '" y="' + b[1] + '" width="32" height="' + (base - b[1]) + '" rx="5" fill="' + b[2] + '"/><rect x="' + (b[0] + 6) + '" y="' + (b[1] + 8) + '" width="20" height="5" rx="2.5" fill="#fff" opacity=".7"/>'; });
+  s += '<circle cx="614" cy="66" r="44" fill="#C4DCD6"/><circle cx="610" cy="62" r="44" fill="#fff"/><path d="M598 34h24v16h16v24h-16v16h-24v-16h-16v-24h16z" fill="#2FA36B"/>';
+  s += '<rect y="148" width="720" height="62" fill="#BF8452"/><rect y="142" width="720" height="14" rx="6" fill="#D9A572"/>';
+  s += '<ellipse cx="490" cy="146" rx="46" ry="6" fill="#A66E40" opacity=".5"/><path d="M454 146V82l10 8l10-8l10 8l10-8l10 8l10-8v64z" fill="#fff"/><path d="M504 82l10 8l10-8v64h-20z" fill="#E4F2EE"/><rect x="464" y="102" width="50" height="26" rx="5" fill="#FFF6DD"/><rect x="471" y="109" width="34" height="4" rx="2" fill="#BF8452"/><rect x="471" y="117" width="22" height="4" rx="2" fill="#BF8452"/>';
+  s += '<path d="M546 96q10 11 0 24M558 86q18 22 0 44" fill="none" stroke="#E88F7C" stroke-width="4" stroke-linecap="round"/>';
+  return s + "</svg>";
+}
+
+/* ---------- views ---------- */
+function jurisSwitch() {
+  var box = h("div", { class: "switch", role: "group", "aria-label": "Where do you practise?" });
+  [["ie", "Ireland"], ["us", "United States"]].forEach(function (j) { box.appendChild(h("button", { "aria-pressed": String(P.juris === j[0]), onclick: function () { P.juris = j[0]; persist(); render(false); }, text: j[1] })); });
+  return box;
+}
+function usNote() { return P.juris === "us" ? h("p", { class: "ph block" }, h("b", { text: "Draft" }), " United States content will come from the UMass Amherst collaborator. You are seeing the Ireland draft.") : null; }
+function faceSVG(k) {
+  var defs = Object.keys(HEADS).map(function (h) { return '<clipPath id="jh-' + h + '"><path d="' + HEADS[h] + '"/></clipPath>'; }).join("");
+  return '<svg viewBox="84 62 232 232" role="img" aria-label="' + k.charAt(0).toUpperCase() + k.slice(1) + '"><defs>' + defs + '</defs><rect x="84" y="62" width="232" height="232" fill="' + THEME[k].w2 + '"/>' + character(CAST[k], "high") + "</svg>";
+}
+function viewTitle() {
+  var faces = h("div", { class: "faces" });
+  ["jamie", "ash", "maya"].forEach(function (k) { faces.appendChild(h("div", { class: "face", svg: faceSVG(k) })); });
+  return [h("div", { class: "title" },
+    h("p", { class: "ribbon", text: "Draft version · for grant application purposes only" }),
+    h("div", { svg: logoSVG(104) }), h("h1", { text: "GAIN" }),
+    h("p", { class: "lead" }, h("strong", { text: "Gender-Affirming care In Nursing" })),
+    h("p", { class: "gamename", text: "Clinic Day" }), h("p", { text: "A clinic simulation for nurse practitioners. One conversation at a time." }),
+    faces, h("p", { class: "small muted", text: "Jamie, Ash and Maya are waiting to see you." }),
+    h("div", { class: "modes" },
+      h("button", { class: "modecard", onclick: function () { P.mode = "solo"; persist(); go("map"); } }, h("strong", { text: "Learn on your own" }),
+        h("span", { text: "Play the cases at your own pace, with a debrief after each." })),
+      h("button", { class: "modecard alt", onclick: function () { P.mode = "fac"; persist(); go("session"); } }, h("strong", { text: "Teach a group" }),
+        h("span", { text: "Run any of the cases with a class, with prompts, hand counts and a guided debrief." }))),
+    h("div", { class: "row", style: "justify-content:center" }, h("button", { class: "btn ghost", onclick: function () { S.back = "title"; go("how"); }, text: "How it works" })),
+    h("p", { class: "small muted", text: "Where do you practise?" }), jurisSwitch(),
+    h("p", { class: "small muted", text: "Nothing you do here is recorded or sent anywhere." }))];
+}
+function roomState(c) { return c.dev ? "dev" : c.locked && !foundationDone() ? "locked" : "open"; }
+function foundationDone() { return P.fast || clinic("foundation").cases.every(function (x) { return P.done[x.k]; }); }
+function clinicMins(c) { var t = 0, d = 0; c.cases.forEach(function (x) { if (x.mins) { t += x.mins; if (P.done[x.k]) d += x.mins; } }); return { total: t, done: d }; }
+function timeBar(done, total, label) {
+  return h("div", { class: "timebar" }, h("div", { class: "row between" }, h("span", { class: "small", text: label }), h("span", { class: "small muted", text: done + " of about " + total + " minutes done" })),
+    h("div", { class: "track", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(total), "aria-valuenow": String(done), "aria-label": label }, h("div", { class: "fill", style: "width:" + Math.max(3, Math.round(done / total * 100)) + "%" })));
+}
+function viewHow() {
+  var items = ["Choose a clinic on the map. Everyone starts in the Foundation Clinic; the focus clinics open when you finish it or pass the fast track.",
+    "Each case is one patient visit of about ten minutes. You read the chart or form first, then run the visit.",
+    "Your choices move the trust meter. When trust is low, the patient tells you less, and you may miss what matters.",
+    "On a first play you see only how the patient reacts. The reasoning comes in the debrief. Replay a case to try other paths and see the reasoning as you go.",
+    "Everything works by tapping or with the keyboard. Drag tasks also work by tapping.",
+    "For a harder game, hide the trust meter from the clinic map and read the patient\u2019s face and posture instead.",
+    "Nothing you do is recorded or sent anywhere. Progress is kept on this device only. A yellow Draft tag marks content that has not yet been supplied or verified."];
+  var ol = h("ol", { class: "how" }); items.forEach(function (t) { ol.appendChild(h("li", { text: t })); });
+  return [h("button", { class: "plain link", onclick: function () { go(S.back || "title"); }, text: "\u2190 Back" }), h("h2", { text: "How it works" }), h("div", { class: "panel" }, ol),
+    h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { go("map"); }, text: "Go to the clinic map" }))];
+}
+function viewMap() {
+  var rooms = h("div", { class: "rooms" }), f = clinic("foundation");
+  CLINICS.slice(1).forEach(function (c) {
+    var st = roomState(c);
+    rooms.appendChild(h("button", { class: "room " + st, style: "--c:" + c.color + ";--t:" + c.tint, onclick: function () { S.clinic = c.k; go("clinic"); } },
+      h("span", { svg: doorSVG(c.color, st) }), h("strong", { text: c.name }), h("span", { class: "pill", text: st === "open" ? c.cases.length + " cases" : c.status })));
+  });
+  var n = f.cases.filter(function (x) { return P.done[x.k]; }).length;
+  return [
+    h("div", { class: "row between" }, h("button", { class: "plain", "aria-label": "Back to the title screen", onclick: function () { go("title"); }, svg: logoSVG(44) }),
+      h("span", { class: "small muted", text: "Practising in " + (P.juris === "us" ? "the United States" : "Ireland") })),
+    h("h2", { text: "Choose a clinic" }),
+    h("p", { text: "Everyone starts in the Foundation Clinic. Finish it, or take the fast track, and the focus clinics open." }),
+    timeBar(clinicMins(f).done, clinicMins(f).total, "Pilot content: Foundation Clinic"),
+    h("div", { class: "map" }, h("p", { class: "eyebrow", text: "Focus clinics" }), rooms, h("div", { class: "corridor", "aria-hidden": "true" }),
+      h("button", { class: "room main", style: "--c:" + f.color + ";--t:" + f.tint, onclick: function () { S.clinic = "foundation"; go("clinic"); } },
+        h("span", { svg: doorSVG(f.color, "open") }),
+        h("span", { class: "maintext" }, h("strong", { class: "big", text: f.name }), h("span", { class: "small", text: f.sub }),
+          h("span", { class: "row" }, h("span", { class: "pill req", text: "Required" }), h("span", { class: "pill", text: n + " of " + f.cases.length + " done" }), h("span", { class: "pill", text: "About " + clinicMins(f).total + " min" }), h("span", { class: "go", text: "Enter →" })))),
+      h("div", { class: "stub", "aria-hidden": "true" }), h("div", { class: "here", text: "You are here" })),
+    foundationDone() ? h("div", { class: "strip" }, h("span", { class: "small" }, h("strong", { text: "Focus clinics open. " }), "Hormone management cases are in development.")) : h("div", { class: "strip" }, h("span", { class: "small" }, h("strong", { text: "Done this before? " }), "Take the fast track: try Maya\u2019s case, the last in the Foundation Clinic. Handle it well and the focus clinics open."), h("button", { class: "btn ghost", onclick: function () { startCase("maya", true); }, text: "Fast track \u2192" })),
+    nextCase() ? h("div", { class: "row" }, h("button", { class: "btn big", onclick: function () { startCase(nextCase().k, false); }, text: (Object.keys(P.plays).length ? "Continue: " : "Start: ") + nextCase().who + " \u2192" })) : null,
+    h("div", { class: "row" }, h("button", { class: "btn ghost", onclick: function () { go("summary"); }, text: "Your summary" }), h("button", { class: "btn ghost", onclick: function () { S.back = "map"; go("how"); }, text: "How it works" }),
+      h("button", { class: "btn ghost", "aria-pressed": String(!!P.hide), onclick: function () { P.hide = !P.hide; persist(); render(false); }, text: "Trust meter: " + (P.hide ? "hidden (harder)" : "shown") }),
+      h("button", { class: "btn ghost", "aria-pressed": String(!!P.clean), onclick: function () { P.clean = !P.clean; persist(); render(false); }, text: "Draft tags: " + (P.clean ? "hidden" : "shown") })),
+    usNote(), draftNote()
+  ];
+}
+function viewClinic() {
+  var c = clinic(S.clinic), st = roomState(c), list = h("div", { class: "panel sheet" });
+  c.cases.forEach(function (x) {
+    var who = h("span", {}, x.who ? h("strong", { text: x.who }) : null, x.who ? h("br") : null, h("span", { class: x.who ? "small" : "", text: x.what }));
+    var wait = x.after && !P.done[x.after] && !P.fast;
+    if (x.mins) who.appendChild(h("span", { class: "small muted", text: "  \u00B7 about " + x.mins + " min" }));
+    if (x.k && P.ends[x.k]) who.appendChild(h("span", { class: "small muted", text: "  \u00B7 endings found " + Object.keys(P.ends[x.k]).length + " of " + ENDN[x.k] }));
+    if (x.play && st === "open" && !wait) list.appendChild(h("button", { class: "slot open" + (P.done[x.k] ? " done" : ""), onclick: function () { startCase(x.k, false); } },
+      h("span", { class: "time", text: x.time }), who, h("span", { class: "go end", text: (P.done[x.k] ? "Done \u00B7 play again" : "Open") + " \u2192" })));
+    else if (x.play && st === "open") list.appendChild(h("div", { class: "slot locked" }, h("span", { class: "time", text: x.time }), who, h("span", { class: "tag end", text: "After " + findCase(x.after).who })));
+    else list.appendChild(h("div", { class: "slot locked" }, h("span", { class: "time", text: x.time }), who, h("span", { class: "tag end", text: st === "locked" ? "Opens after Foundation" : "In development" })));
+  });
+  return [h("button", { class: "plain link", onclick: function () { go("map"); }, text: "← Clinic map" }),
+    h("h2", { text: c.name }), h("p", { class: "muted", text: c.sub }),
+    h("div", { class: "scene", svg: waitingSVG(null) }),
+    h("div", { class: "card" }, h("h3", { text: "What you will practise" }), outcomesList(c)),
+    clinicMins(c).total ? timeBar(clinicMins(c).done, clinicMins(c).total, c.cases.length + " cases") : null,
+    h("p", { class: "eyebrow", text: "This morning\u2019s list" }), list, handoverBtn(c), draftNote()];
+}
+function outcomesList(c) {
+  if (!c.outcomes) return ph("Learning outcomes for this clinic are to be supplied by the clinical lead.");
+  var ul = h("ul", {}); c.outcomes.forEach(function (o) { ul.appendChild(h("li", { text: o })); });
+  return h("div", {}, h("p", { class: "small muted", text: "By the end of this clinic you will be able to:" }), ul, ph("Learning outcomes drafted for review."));
+}
+function summaryText() {
+  var t = ["GAIN: Clinic Day summary", ""];
+  CLINICS.forEach(function (c) { var d = c.cases.filter(function (x) { return x.k && P.done[x.k]; });
+    t.push(c.name + ": " + (d.length ? d.length + " of " + c.cases.length + " cases completed (" + d.map(function (x) { return x.who; }).join(", ") + ")" : c.dev ? "in development" : "not yet completed")); });
+  var msgs = []; Object.keys(KEYMSG).forEach(function (k) { if (P.done[k]) msgs = msgs.concat(KEYMSG[k]); });
+  if (msgs.length) { t.push("", "Key messages"); msgs.forEach(function (m) { t.push("- " + m); }); }
+  return t.join("\n");
+}
+function viewSummary() {
+  var txt = summaryText(), status = h("span", { class: "small muted", role: "status" });
+  function fail() { status.textContent = "Copy did not work here. Select the text and copy it."; }
+  return [h("button", { class: "plain link", onclick: function () { go("map"); }, text: "← Clinic map" }),
+    h("h2", { text: "Your summary" }),
+    h("p", { text: "This stays on your device. Copy it if you want it for your own professional development record." }),
+    h("pre", { class: "panel summary", id: "sumtext", text: txt }),
+    h("div", { class: "row" },
+      h("button", { class: "btn", onclick: function () { try { navigator.clipboard.writeText(txt).then(function () { status.textContent = "Copied."; }, fail); } catch (e) { fail(); } }, text: "Copy summary" }),
+      h("button", { class: "btn ghost", onclick: function () { P.done = {}; P.plays = {}; P.fast = false; persist(); render(false); }, text: "Clear my progress" }), status)];
+}
+function togglePin(id) {
+  var i = S.pins.indexOf(id);
+  if (i >= 0) { S.pins.splice(i, 1); pinMsg = ""; }
+  else if (S.pins.length >= MAXPINS) pinMsg = "Your notes are full. Remove a line to add another.";
+  else { S.pins.push(id); pinMsg = ""; }
+  render(false);
+}
+function viewChart() {
+  var tab = CHART.filter(function (t) { return t.k === S.tab; })[0], tabs = h("div", { class: "tabs", role: "tablist" }), body = h("div", { class: "sheetbody", role: "tabpanel" });
+  CHART.forEach(function (t) { tabs.appendChild(h("button", { class: "tab", role: "tab", "aria-selected": String(t.k === S.tab), onclick: function () { S.tab = t.k; render(false); }, text: t.name })); });
+  tab.groups.forEach(function (g) {
+    var grp = h("div", { class: "grp" }, h("h4", { text: g.h }));
+    if (g.head) { var hd = h("div", { class: "line cols thead", style: "--n:" + (g.head.length - 1) }); g.head.forEach(function (c) { hd.appendChild(h("span", { text: c })); }); hd.appendChild(h("span", {})); grp.appendChild(hd); }
+    g.rows.forEach(function (r) {
+      var on = pinned(r.id), b = h("button", { class: "line" + (r.c ? " cols" : r.t ? " free" : "") + (on ? " pinned" : ""), "aria-pressed": String(on), onclick: function () { togglePin(r.id); } });
+      if (r.c) { b.setAttribute("style", "--n:" + (r.c.length - 1)); r.c.forEach(function (c) { b.appendChild(h("span", {}, val(c))); }); }
+      else if (r.t) b.appendChild(h("span", { text: r.t }));
+      else { b.appendChild(h("span", { class: "k", text: r.l })); b.appendChild(h("span", {}, val(r.v))); }
+      b.appendChild(h("span", { class: "pin", "aria-hidden": "true", text: on ? "\u2713 Noted" : "+ Note" }));
+      grp.appendChild(b);
+    });
+    if (g.foot) grp.appendChild(ph(g.foot));
+    body.appendChild(grp);
+  });
+  function bf(a, b) { return h("div", {}, h("small", { text: a }), b); }
+  return [
+    h("p", { class: "eyebrow", text: "08:50 · before the patient comes in" }),
+    h("h2", { text: "Review the chart" }),
+    h("p", { text: "Read as you would before any review. Tap a line to add it to your notes. You can carry " + MAXPINS + " lines into the room, so choose what matters." }),
+    h("div", { class: "ehr" },
+      h("div", { class: "ehr-banner" }, h("div", { class: "nm", text: "DOYLE, A." }), bf("DOB", "14 Mar 2002"), bf("MRN", "0042716"), bf("Clinic", "Hormone review"), bf("Today", "16 Nov 2026 · 09:00")),
+      h("div", { class: "ehr-body" }, tabs, body)),
+    pinMsg ? h("p", { class: "why", role: "status", text: pinMsg }) : null,
+    notesCard(true), isFac() ? h("div", { class: "row" }, h("button", { class: "btn ghost", onclick: function () { S.pins = ["d2", "d3", "d9", "r1", "p4", "n2"]; render(false); }, text: "Note the six key findings for the class" })) : null, usNote(),
+    h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { pinMsg = ""; go("waiting"); }, text: "Call the patient" }))
+  ];
+}
+function resultBlock(o, by, next, nextText) {
+  return [ h("div", { class: "you" }, h("span", { class: "by", text: by }), o.t || o.did),
+    o.r ? h("p", { class: "narr", text: o.r }) : null, h("div", { class: "row" }, chip(o.d)), whyEl(o.why),
+    h("div", { class: "row" }, h("button", { class: "btn", onclick: next, text: nextText })) ];
+}
+function fill(panel, parts) { parts.forEach(function (p) { if (p) panel.appendChild(p); }); return panel; }
+function viewWaiting() {
+  var panel = h("div", { class: "panel appear" });
+  if (!S.c1) {
+    var keys = found("name") ? ["jamie", "surname", "legal"] : ["surname", "legal"], box = h("div", { class: "options" });
+    shuffle(keys).forEach(function (k) { box.appendChild(h("button", { class: "opt", "data-o": k, onclick: function () { S.c1 = k; render(true); }, text: CALLS[k].t })); });
+    if (!found("name")) box.appendChild(h("button", { class: "opt", onclick: function () { S.tab = "demo"; go("chart"); }, text: "Step back and check the chart again." }));
+    fill(panel, [h("p", { class: "eyebrow", text: "Decision 1 of 6 · The waiting room" }),
+      h("p", { class: "narr", text: "The waiting room is full. Your 09:00 patient is one of these four people." }),
+      h("h3", { text: "What do you call out?" }), facOptions(box, "c1")]);
+  } else fill(panel, [h("p", { class: "eyebrow", text: "Decision 1 of 6 · The waiting room" })].concat(
+      resultBlock(CALLS[S.c1], "You", function () { go("room"); }, "Go to your room")));
+  return [h("div", { class: "scene pin" }, h("div", { svg: waitingSVG(S.c1) }), S.c1 ? meter() : null), panel, S.c1 ? null : notesCard(false)];
+}
+function choose(panel, key, num, title, scene, options, next) {
+  var c = S[key];
+  panel.appendChild(h("p", { class: "eyebrow", text: "Decision " + num + " of 6 · " + title }));
+  if (c == null) {
+    var box = h("div", { class: "options" });
+    S.orders[key].forEach(function (oi) { box.appendChild(h("button", { class: "opt", "data-o": String(oi), onclick: function () { S[key] = oi; render(true); }, text: options[oi].t })); });
+    fill(panel, [h("p", { class: "narr", text: scene }), h("h3", { text: "What do you say?" }), facOptions(box, key)]);
+    return true;
+  }
+  fill(panel, resultBlock(options[c], "You say", next, "Continue"));
+  return false;
+}
+function draggable(el, onDrop) {
+  el.addEventListener("pointerdown", function (ev) {
+    var sx = ev.clientX, sy = ev.clientY, moved = false;
+    try { el.setPointerCapture(ev.pointerId); } catch (e) {}
+    function mv(e) { var dx = e.clientX - sx, dy = e.clientY - sy; if (Math.abs(dx) + Math.abs(dy) > 6) moved = true; el.style.transform = "translate(" + dx + "px," + dy + "px)"; el.classList.add("moving"); }
+    function up(e) {
+      el.removeEventListener("pointermove", mv); el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up);
+      el.style.transform = ""; el.classList.remove("moving");
+      var z = document.getElementById("drop").getBoundingClientRect();
+      var inside = e.clientX >= z.left && e.clientX <= z.right && e.clientY >= z.top && e.clientY <= z.bottom;
+      if (e.type === "pointerup" && (inside || !moved)) onDrop();
+    }
+    el.addEventListener("pointermove", mv); el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+  });
+  el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onDrop(); } });
+}
+function labelTask(panel) {
+  panel.appendChild(h("p", { class: "eyebrow", text: "Hands on · Reprint the label" }));
+  if (!S.labelOpen && !S.labelDone) { panel.appendChild(h("p", { class: "narr", text: "The old label is still on your desk. Tap it in the picture, or use the button." })); panel.appendChild(h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { S.labelOpen = true; render(false); }, text: "Pick up the label" }))); return; }
+  var drop = h("div", { class: "drop" + (S.labelDone ? " done" : ""), id: "drop", text: S.labelDone ? "Jamie Doyle" : "Drop a name here" });
+  panel.appendChild(h("p", { class: "narr", text: S.labelDone ? "The printer whirs. Jamie sticks the new label over the old one." : "The label printer is on your desk. Drag a name onto the label, or tap it." }));
+  panel.appendChild(h("div", { class: "labelmock" }, h("span", { text: "CLINIC LABEL · 09:00" }), drop, h("span", { text: "Hormone review" })));
+  if (S.labelDone) { panel.appendChild(h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { S.phase = 3; render(true); }, text: "Continue" }))); return; }
+  var chips = h("div", { class: "row" });
+  [["Ms A. Doyle", "That title and name are the ones he asked you to stop using."], ["Jamie Doyle", ""], ["A. Doyle", "Still the legal name. He told you what he is called."]].forEach(function (c) {
+    var b = h("button", { class: "drag", text: c[0] });
+    draggable(b, function () {
+      if (!c[1]) { S.labelDone = true; labelMsg = ""; render(false); }
+      else { labelMsg = c[1]; render(false); var d = document.getElementById("drop"); if (d) d.classList.add("shake"); }
+    });
+    chips.appendChild(b);
+  });
+  panel.appendChild(chips);
+  if (labelMsg) panel.appendChild(h("p", { class: "why", role: "status", text: labelMsg }));
+}
+function probeTask(panel) {
+  panel.appendChild(h("p", { class: "eyebrow", text: "Decision 4 of 6 · What to follow up" }));
+  if (S.probed) {
+    var o = probeOutcome();
+    PROBES.forEach(function (p) { if (S.probes.indexOf(p.k) >= 0) { panel.appendChild(h("div", { class: "you" }, h("span", { class: "by", text: "You ask about" }), p.t.toLowerCase())); panel.appendChild(h("div", { class: "answer", text: p.r })); } });
+    fill(panel, [h("div", { class: "row" }, chip(o.d)), whyEl(o.why),
+      h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { S.phase = 4; render(true); }, text: "Continue" }))]);
+    return;
+  }
+  var box = h("div", { class: "seg" });
+  PROBES.forEach(function (p) {
+    var on = S.probes.indexOf(p.k) >= 0;
+    box.appendChild(h("button", { "aria-pressed": String(on), onclick: function () {
+      var i = S.probes.indexOf(p.k); if (i >= 0) S.probes.splice(i, 1); else if (S.probes.length < 2) S.probes.push(p.k); render(false); }, text: p.t }));
+  });
+  fill(panel, [h("p", { class: "narr", text: "You asked how things have been since August, and Jamie said a lot at once. You have time to follow up two things before the review itself." }),
+    h("h3", { text: "Which two do you ask about?" }), box,
+    h("div", { class: "row" }, S.probes.length === 2 ? h("button", { class: "btn", onclick: function () { S.probed = true; render(true); }, text: "Ask Jamie" }) : h("span", { class: "small muted", text: "Choose " + (2 - S.probes.length) + " more" }))]);
+}
+function recordTask(panel) {
+  panel.appendChild(h("p", { class: "eyebrow", text: "Decision 6 of 6 · The record" }));
+  if (S.c4) { fill(panel, resultBlock(recOutcome(), "You", function () { S.phase = 6; render(true); }, "Finish the visit")); return; }
+  panel.appendChild(h("p", { class: "narr", text: "The visit is nearly over and the record is open. Jamie is still here if you want to ask him anything." }));
+  REC.forEach(function (r) {
+    var seg = h("div", { class: "seg", role: "group", "aria-label": r.label });
+    r.opts.forEach(function (o, i) { seg.appendChild(h("button", { "aria-pressed": String(S.rec[r.k] === i), onclick: function () { S.rec[r.k] = i; render(false); }, text: o })); });
+    seg.appendChild(h("button", { class: "ask", onclick: function () { S.asked[r.k] = true; render(false); }, text: "Ask Jamie" }));
+    panel.appendChild(h("div", { class: "rec" }, h("strong", { text: r.label }), seg, S.asked[r.k] ? h("div", { class: "answer appear", text: r.ans }) : null));
+  });
+  panel.appendChild(h("div", { class: "envelope", "aria-label": "Preview of the next letter" }, h("span", { class: "small muted", text: "Next letter will be addressed to" }), h("strong", { text: REC[1].opts[S.rec.letters] }), h("span", { class: "small", text: "Family home, Naas" })));
+  panel.appendChild(h("div", { class: "row" },
+    h("button", { class: "btn", onclick: function () { S.c4 = "save"; render(true); }, text: "Save the record" }),
+    h("button", { class: "btn ghost", onclick: function () { S.c4 = "leave"; render(true); }, text: "Leave it for reception" })));
+}
+function viewRoom() {
+  var panel = h("div", { class: "panel appear" }), line = null, showNotes = false;
+  if (S.phase === 0) { if (choose(panel, "intro", 2, "Introductions", "Jamie follows you in and stands by the chair, waiting.", introOptions(), function () { S.phase = 1; render(true); })) showNotes = true; }
+  else if (S.phase === 1) { if (choose(panel, "label", 3, TALK.label.title, TALK.label.scene, TALK.label.options, function () { S.phase = 2; render(true); })) line = TALK.label.patient; }
+  else if (S.phase === 2) labelTask(panel);
+  else if (S.phase === 3) { probeTask(panel); if (!S.probed) { line = OPENING; showNotes = true; } }
+  else if (S.phase === 4) { if (choose(panel, "rx", 5, TALK.rx.title, TALK.rx.scene, TALK.rx.options, function () { S.phase = 5; render(true); })) line = TALK.rx.patient; panel.appendChild(ph(TALK.rx.draft)); }
+  else if (S.phase === 5) recordTask(panel);
+  else {
+    line = ENDINGS[tier(trust())].line;
+    fill(panel, [h("p", { class: "eyebrow", text: "Before he leaves" }), h("p", { class: "narr", text: "As Jamie picks up his jacket, you ask whether there is anything else." }),
+      h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { go("debrief"); }, text: "See the debrief" }))]);
+  }
+  var art = h("div", { class: "art", svg: roomSVG(tier(trust())) });
+  if (S.phase === 2 && !S.labelOpen && !S.labelDone) art.appendChild(h("button", { class: "hot", "aria-label": "Pick up the label on the desk", onclick: function () { S.labelOpen = true; render(false); } }));
+  return [h("div", { class: "scene pin" }, art, meter()),
+    line ? h("div", { class: "speech appear" }, h("span", { class: "by", text: "Jamie" }), "“" + line + "”") : null, panel, showNotes ? notesCard(false) : null];
+}
+function viewDebrief() {
+  if (!S.counted) { S.counted = true; P.plays.jamie = (P.plays.jamie || 0) + 1; P.done.jamie = true; var kk = tier(trust()); (P.ends.jamie = P.ends.jamie || {})[kk] = 1; P.last.jamie = { head: ENDINGS[kk].head, key: kk }; persist(); }
+  var t = trust(), k = tier(t), e = ENDINGS[k], out = [], rec = recOutcome(), io = introOptions(), pr = probeOutcome(), lo = TALK.label.options, ro = TALK.rx.options;
+  var items = [
+    { title: "The waiting room", did: CALLS[S.c1].t, d: CALLS[S.c1].d, why: CALLS[S.c1].why + (found("name") ? "" : " “Known as” was not in your notes, so you had no name to use."), best: S.c1 === "jamie", better: "Note “Known as: Jamie” from Demographics, then call “Jamie”." },
+    { title: "Introductions", did: io[S.intro].t, d: io[S.intro].d, why: io[S.intro].why, best: S.intro === 0, better: "Give your own name and role, then confirm the name and pronouns on his chart." },
+    { title: "The label", did: lo[S.label].t, d: lo[S.label].d, why: lo[S.label].why, best: S.label === 0, better: lo[0].t },
+    { title: "What to follow up", did: pr.did, d: pr.d, why: pr.why, best: pr.d > 0, better: "Follow up the gel he ran out of. Tiredness is the natural second question." },
+    { title: "The prescription", did: ro[S.rx].t, d: ro[S.rx].d, why: ro[S.rx].why, best: S.rx === 0, better: ro[0].t },
+    { title: "The record", did: rec.did, d: rec.d, why: rec.why, best: rec.d > 0, better: "Ask Jamie which name to use on the chart, on letters and on calls, then update all three." }
+  ];
+  out.push(h("p", { class: "eyebrow", text: "Debrief · Jamie, 09:00" }));
+  out.push(h("h2", { text: e.head }));
+  out.push(h("div", { class: "card " + k }, h("p", { text: e.text }), h("p", { class: "small muted", text: "Trust at the end of the visit: " + word(t) + ". Endings found: " + Object.keys(P.ends.jamie).length + " of 3." })));
+  out.push(h("div", { class: "scene", svg: pharmacySVG() }));
+  out.push(h("div", { class: "card" }, h("h3", { text: "What was going on" }),
+    h("p", { text: "The pharmacy reads the name on the prescription aloud at the counter, so Jamie has been putting off collecting it. The chart showed it twice: late and uncollected prescriptions, and a testosterone level that had fallen since August." }),
+    brokenPromise() ? h("p", {}, h("strong", { text: "Two days later: " }), "the pharmacy queries the new prescription because the name does not match its record. Jamie has to explain himself at the counter.") : null));
+  var fl = h("ul", { class: "finds" }), n = 0;
+  Object.keys(KEYS).forEach(function (key) { var ok = found(key); if (ok) n++; fl.appendChild(h("li", { class: ok ? "ok" : "miss" }, h("strong", { text: ok ? "Noted  " : "Missed  " }), KEYS[key].label)); });
+  out.push(h("div", { class: "card" }, h("h3", { text: "Your chart review: " + n + " of 6 key findings" }), fl));
+  var det = h("details", { class: "card" }, h("summary", { text: "Your six decisions, step by step" }));
+  items.forEach(function (it, i) {
+    det.appendChild(h("div", { class: "card" }, h("div", { class: "row" }, h("strong", { text: (i + 1) + ". " + it.title }), chip(it.d)),
+      h("p", { text: it.did }), h("p", { class: "why", text: it.why }),
+      it.best ? null : h("p", { class: "small" }, h("strong", { text: "Stronger option: " }), it.better)));
+  });
+  out.push(det);
+  var km = h("ul", {}); KEYMSG.jamie.forEach(function (m) { km.appendChild(h("li", { text: m })); });
+  out.push(h("div", { class: "card" }, h("h3", { text: "Four things to take away" }), km));
+  out.push(h("div", { class: "card" }, h("h3", { text: "Phrases worth keeping" }),
+    h("ul", {}, h("li", { text: "“Jamie, he/him: have I got that right?”" }), h("li", { text: "“I’m sorry about that. I’ll correct it today.”" }),
+      h("li", { text: "“Which name should go on letters to your home?”" }))));
+  out.push(h("div", { class: "card" }, h("h3", { text: "References" }), ph("References and guidelines to be supplied by the clinical lead."), usNote()));
+  out.push(h("div", { class: "row" },
+    h("button", { class: "btn", onclick: function () { startCase("jamie", false); }, text: "Play again for another ending" }),
+    h("button", { class: "btn ghost", onclick: function () { go("clinic"); }, text: "Back to the clinic" }),
+    h("button", { class: "btn ghost", onclick: function () { go("summary"); }, text: "Your summary" })));
+  out.push(draftNote());
+  return out;
+}
+/* ---------- scripted cases: edit the text here ---------- */
+var SCRIPT = {
+  ash: { who: "Ash", cast: "ash",
+    story: "Ash was not holding anything back, and not every patient is. If you signposted the sensitive questions well, Ash told you there and then about avoiding cervical screening. What depended on trust was whether Ash would come back.",
+    phrases: ["\u201cWhat pronouns do you use?\u201d", "\u201cSo I know which checks apply to you\u2026\u201d", "\u201cAre there words you prefer I use?\u201d"],
+    endings: {
+      high: { line: "No, that\u2019s everything. I\u2019ll book the follow-up on my way out. Thanks for making that easy.", head: "Ash will be back.", text: "Nothing was being held back. What trust changed was whether Ash would return, and they will." },
+      mid:  { line: "No, that\u2019s everything.", head: "Ash left without booking a follow-up.", text: "Nothing was hidden. But a first visit that only just went all right is a weak reason to come back." },
+      low:  { line: "No.", head: "Ash is unlikely to return.", text: "Nothing was hidden. The cost of this visit is one more clinic that Ash would prefer to avoid." } },
+    steps: [
+      { id: "intro", type: "choice", title: "Introductions", q: "What do you say?", scene: "Ash is a new patient, here to register. The paper form from reception has no space for pronouns.", options: [
+        { t: "“Hi Ash, I’m [your name], the nurse practitioner. What pronouns do you use?”", d: 1, r: "“They/them. Thanks.” Ash puts their bag down.", why: "Name, role, then an open question. Nothing on the form told you, so asking was the only reliable route." },
+        { t: "“Hi Ash, I’m [your name]. Take a seat and we’ll get you registered. It won’t take long at all.”", d: 0, r: "Ash sits, and waits to see which words you will use for them.", why: "Friendly, but the question still has to be answered, and now the form will force it at a worse moment." },
+        { t: "“Hi Ash. I don’t want to get this wrong, so tell me: is it he or she?”", d: -1, r: "“Neither.” Ash looks at the door.", why: "The intention was good, but offering two options told Ash there was no room for their answer." } ] },
+      { id: "form", type: "form", title: "The registration form" },
+      { id: "sex", type: "choice", title: "The field with two boxes", q: "What do you say?", scene: "The system will not save without the Sex field, and it offers only M or F.", patient: "What does it need that for?",
+        draft: "What this field is used for, and how it may be recorded, is to be supplied for each jurisdiction.", options: [
+        { t: "“It is a limit of our system. Let me tell you what it is used for, and you tell me how you want it recorded.”", d: 1, r: "“Okay. If you’re writing down the rest properly, I can live with that.”", why: "You named the limit as the system’s, explained the purpose, and left the decision with Ash." },
+        { t: "Quietly tick the box that looks right to you and move on.", d: -1, r: "Ash sees the screen. “You didn’t ask.”", why: "A guess about someone’s body, recorded as fact, with no chance for them to answer." },
+        { t: "“Everyone has to pick one. It’s just for the computer, so don’t read anything into it.”", d: 0, r: "“Right.” Ash’s answers get shorter.", why: "True, but it treats the question as trivial. Ash has been asked to fit two boxes all their life." } ] },
+      { id: "sign", type: "choice", title: "Before the personal questions", q: "How do you begin?", scene: "The health history includes sexual health and screening. Those questions depend on which body parts a person has.", options: [
+        { t: "“Some of the next questions are about sexual health and anatomy, so I know which checks apply to you. Is that all right? Tell me if there are words you prefer.”", d: 1, r: "\u201cYeah, okay. \u2018Chest\u2019, not the other word. And I\u2019ve never gone for cervical screening, if that\u2019s on your list. The letters say \u2018Ms\u2019.\u201d", why: "Signpost, give the reason, ask permission, and invite their own words." },
+        { t: "“Were you born male or female?”", d: -1, r: "Ash folds their arms. “Why?”", why: "The question was about history when you needed to know about anatomy, and it came with no reason." },
+        { t: "Skip the section so that Ash is not made uncomfortable on a first visit.", d: 0, r: "Ash notices the pages you turned past.", why: "Avoiding the questions protects your comfort more than theirs, and leaves gaps in their care." } ] },
+      { id: "rel", type: "choice", title: "Something Ash mentions", q: "What do you say?", scene: "As you finish, Ash adds something.", patient: "I’m on the waiting list for top surgery, by the way. In case that matters.", options: [
+        { t: "“Thanks for telling me. Is there anything about that you’d like help with today?”", d: 1, r: "“Not today. But good to know I can ask.”", why: "You acknowledged it, offered help, and asked nothing you did not need to know." },
+        { t: "“Oh, interesting. And will you be having anything done down below as well?”", d: -1, r: "“That’s… not why I’m here.”", why: "Curiosity is not a clinical reason. Ask about bodies only when today’s care depends on the answer." },
+        { t: "\u201cRight. Any allergies?\u201d", d: 0, r: "Ash lets it drop.", why: "Moving on avoided harm, but it also closed a door Ash had opened." },
+        { t: "\u201cTop surgery? Good for you. That\u2019s so brave.\u201d", d: 0, r: "\u201cEh. Thanks.\u201d Ash looks at their hands.", why: "Well meant, but praise for bravery makes their care about your reaction. A plain acknowledgement is enough." } ] }
+    ] },
+  maya: { who: "Maya", cast: "maya",
+    story: "When her pharmacy ran short, Maya bought some of her hormones online, and her sister does not know. She needed both trust and a private moment to say so.",
+    phrases: ["“Her sample. Sorry, Maya.”", "“I see everyone on their own for part of the visit.”", "“I’ll only ask what matters for today.”"],
+    endings: {
+      high: { line: "Since it’s just us: Orla doesn’t know, but when the pharmacy ran short I bought some of my hormones online.", head: "Maya told you something her sister does not know.", text: "Privacy and trust together made that possible. You can now talk with her about her supply and her safety." },
+      pub:  { line: "No. That’s everything.", head: "Maya trusted you, but her sister was in the room.", text: "She had something to tell you and no private moment in which to say it. Trust was not enough without privacy." },
+      mid:  { line: "There was something… no, it’s grand.", head: "Maya nearly told you something.", text: "She weighed it up and decided against. A little more trust, or a private moment, might have changed that." },
+      low:  { line: "No.", head: "Maya told you nothing more.", text: "Maya has been buying some of her hormones online. You did not find out." } },
+    steps: [
+      { id: "match", type: "match", title: "Two records, one person" },
+      { id: "slip", type: "choice", slip: true, title: "Your own slip", q: "What do you do now?", scene: "Maya comes in with her sister, Orla. Reading from the laboratory label, you say: “The hospital has his sample under the old record.” Maya’s face changes. You have just misgendered her.", options: [
+        { t: "“Her sample. Sorry, Maya.” Then carry on with what you were saying.", d: 1, r: "Maya nods once. The moment passes.", why: "Correct it, apologise in a word, move on. A short recovery keeps the visit about her." },
+        { t: "“Oh God, I’m so sorry. It’s just the label says ‘Mr’ and I was reading it out, and I never normally do that…”", d: 0, r: "“It’s fine,” says Maya. Orla looks at the floor.", why: "The explanation makes your discomfort the subject, and repeats the title she did not want to hear." },
+        { t: "Carry on as if nothing happened.", d: -1, r: "Maya says nothing. Orla says, quietly, “Her.”", why: "She noticed. Leaving it uncorrected tells her it may happen again, and left her sister to do your job." },
+        { t: "Turn to Orla: \u201cSorry, I meant her.\u201d", d: 0, r: "Orla nods. Maya is still waiting.", why: "The correction was right, but the apology went to the wrong person." } ] },
+      { id: "lab", type: "choice", title: "The laboratory record", q: "What do you do?", scene: "Maya has seen the label on your desk.", patient: "Why does it still say that? I changed everything two years ago.",
+        draft: "How a correction is requested between systems is to be supplied for each jurisdiction.", options: [
+        { t: "“The laboratory still holds your old details. The result is safely yours: I matched it on date of birth and record number. Shall I ask them to correct it?”", d: 1, r: "“Yes. Please.” She breathes out.", why: "A plain explanation, reassurance that the result is hers, and an offer to act." },
+        { t: "Say nothing for now, and email the laboratory after she has left.", d: 0, r: "Maya waits for an answer that does not come.", why: "Fixing it is right. Fixing it silently leaves her question unanswered." },
+        { t: "“That’s the hospital’s system. You’d need to take it up with them.”", d: -1, r: "“I have. Twice.”", why: "It hands the work back to the person with the least power to fix it." } ] },
+      { id: "third", type: "choice", either: true, title: "Someone else in the room", q: "What do you do?", scene: "The next part of the visit involves personal questions. Orla is still sitting beside Maya.",
+        draft: "Local policy on seeing patients alone is to be confirmed.", options: [
+        { t: "“I see everyone on their own for part of the visit. Orla, would you mind waiting outside for a few minutes?”", d: 1, r: "Orla picks up her coat. Maya gives you a small, relieved look.", why: "Making time alone routine means Maya never has to choose, in front of her sister, between privacy and loyalty. The cost: the decision was yours, not hers." },
+        { t: "“Maya, are you happy for Orla to stay while I ask some personal questions?”", d: 1, r: "Maya glances at Orla. \u201cOf course.\u201d", why: "Asking Maya respects her right to decide. The cost: asked in front of her sister, \u2018yes\u2019 is the only easy answer, so she gets no private moment." },
+        { t: "Go ahead with the questions while Orla is there.", d: -1, r: "Maya answers in as few words as she can.", why: "People leave things out in front of family. What she tells you now may not be the whole picture." } ] },
+      { id: "ask", type: "choice", title: "The personal question", q: "How do you ask?", scene: "You need to ask about her body to plan today’s care.",
+        draft: "The specific clinical question for this visit is to be supplied by the clinical lead.", options: [
+        { t: "“I need to ask about your body so I offer you the right checks. I’ll only ask what matters for today. Is that okay?”", d: 1, r: "“Go ahead.”", why: "Reason first, a limit on what you will ask, then permission." },
+        { t: "“So, have you had the operation?”", d: -1, r: "Maya’s jaw tightens. “Which one?”", why: "Vague, and framed around surgery when you needed to know about anatomy. It also assumes a single path." },
+        { t: "Skip the question and work from what the chart seems to suggest.", d: 0, r: "Maya does not know what you assumed.", why: "An assumption recorded as fact can lead to the wrong checks being offered, or missed." } ] }
+    ] }
+};
+var FORM = [
+  { k: "name", label: "Name to use", opts: ["A. Brennan", "Ash"], ok: [1], ans: "“Ash. Just Ash.”" },
+  { k: "title", label: "Title", opts: ["Mr", "Ms", "Mx", "No title"], ok: [2, 3], ans: "“Mx, if it has to have one. No title is better.”" },
+  { k: "pron", label: "Pronouns", opts: ["he/him", "she/her", "they/them"], ok: [2], ans: "“They/them.”" }
+];
+var IDS = [
+  { k: "dob", t: "Date of birth: 03 Jun 1981 on both", safe: true }, { k: "num", t: "Record number: 0031188 on both", safe: true },
+  { k: "addr", t: "Address: 14 Mill Lane on both", safe: true }, { k: "sur", t: "Surname: Nolan on both", safe: true },
+  { k: "title", t: "Title: Ms on one, Mr on the other", safe: false }, { k: "first", t: "First name: Maya on one, M. on the other", safe: false }
+];
+function script() { return SCRIPT[S.kase]; }
+function stepOutcome(st) {
+  if (st.type === "choice") return S.ans[st.id] == null ? null : st.options[S.ans[st.id]];
+  return S.out[st.id] || null;
+}
+function scriptDeltas() { var a = []; script().steps.forEach(function (st) { var o = stepOutcome(st); if (o && typeof o.d === "number") a.push(o.d); }); return a; }
+function companionHere() { return S.kase === "maya" && S.i >= 1 && !(S.ans.third === 0 && S.i > 3); }
+function nextStep() { S.i++; render(true); }
+function formStep(panel, st) {
+  if (S.out.form) { fill(panel, resultBlock(S.out.form, "You", nextStep, "Continue")); return; }
+  if (S.ans.intro === 0) S.fasked.pron = true;
+  panel.appendChild(h("p", { class: "narr", text: "You open a new record. Ash is sitting beside you. The screen is facing you." }));
+  panel.appendChild(h("div", { class: "row" }, h("button", { class: "btn ghost", "aria-pressed": String(!!S.turned), onclick: function () { S.turned = !S.turned; render(false); }, text: S.turned ? "\u2713 Screen turned towards Ash" : "Turn the screen towards Ash" })));
+  FORM.forEach(function (r) {
+    var seg = h("div", { class: "seg", role: "group", "aria-label": r.label });
+    r.opts.forEach(function (o, i) { seg.appendChild(h("button", { "aria-pressed": String(S.form[r.k] === i), onclick: function () { S.form[r.k] = i; render(false); }, text: o })); });
+    seg.appendChild(h("button", { class: "ask", onclick: function () { S.fasked[r.k] = true; render(false); }, text: "Ask Ash" }));
+    panel.appendChild(h("div", { class: "rec" }, h("strong", { text: r.label }), seg, S.fasked[r.k] ? h("div", { class: "answer appear", text: r.ans }) : null));
+  });
+  var ti = S.form.title, nm = S.form.name === 1 ? "Ash Brennan" : "A. Brennan";
+  panel.appendChild(h("div", { class: "envelope", "aria-label": "Preview of the next letter" }, h("span", { class: "small muted", text: "Letters will open" }), h("strong", { text: "Dear " + (ti >= 0 && ti < 3 ? FORM[1].opts[ti] + " Brennan" : nm) })));
+  var ready = FORM.every(function (r) { return S.form[r.k] >= 0; });
+  panel.appendChild(h("div", { class: "row" }, ready ? h("button", { class: "btn", onclick: function () {
+    var wrong = FORM.some(function (r) { return r.ok.indexOf(S.form[r.k]) < 0; }), asked = FORM.filter(function (r) { return S.fasked[r.k]; }).length;
+    S.out.form = wrong ? { d: -1, did: "Completed the form with details Ash had not given you.", r: "Ash reads the screen. “That’s not me.”", why: "A guess on a form becomes the name and title on every letter and label that follows." }
+      : asked >= 3 && !S.turned ? { d: 0, did: "Asked Ash for each detail, but kept the screen facing you.", r: "Ash leans over, trying to see what you typed.", why: "You asked well. Turning the screen would have let Ash check what was recorded." }
+      : asked >= 3 ? { d: 1, did: "Turned the screen, asked Ash for each detail, then entered it.", r: "“That’s the first form that’s had room for me,” says Ash.", why: "Asking takes seconds, and the answer follows them through every later contact." }
+      : { d: 0, did: "Entered the right details, some of them by guesswork.", r: "Ash nods.", why: "You were right this time. Asking is what makes it reliable." };
+    render(true); }, text: "Save the record" }) : h("span", { class: "small muted", text: "Complete all three fields to save" })));
+}
+function matchStep(panel, st) {
+  var o = S.out.match;
+  if (o) { fill(panel, [h("div", { class: "you" }, h("span", { class: "by", text: "You" }), o.did), h("div", { class: "row" }, h("span", { class: "chip " + (o.ok ? "up" : "down"), text: o.ok ? "✓ Safe check" : "✕ Unsafe check" })),
+    whyEl(o.why), h("div", { class: "row" }, h("button", { class: "btn", onclick: nextStep, text: "Call Maya in" }))]); return; }
+  panel.appendChild(h("p", { class: "narr", text: "Before Maya comes in, a result arrives from the hospital laboratory. Its label does not match your clinic record." }));
+  panel.appendChild(h("div", { class: "pair" },
+    h("div", { class: "labelmock" }, h("span", { class: "small muted", text: "CLINIC RECORD" }), h("strong", { text: "Ms Maya Nolan" }), h("span", { text: "DOB 03 Jun 1981" }), h("span", { text: "No. 0031188" }), h("span", { text: "14 Mill Lane" })),
+    h("div", { class: "labelmock" }, h("span", { class: "small muted", text: "LABORATORY LABEL" }), h("strong", { text: "Mr M. Nolan" }), h("span", { text: "DOB 03 Jun 1981" }), h("span", { text: "No. 0031188" }), h("span", { text: "14 Mill Lane" }))));
+  panel.appendChild(h("h3", { text: "Which details will you rely on to confirm this is the same person?" }));
+  var box = h("div", { class: "options" });
+  IDS.forEach(function (d) { var on = S.ids.indexOf(d.k) >= 0;
+    box.appendChild(h("button", { class: "opt check", "aria-pressed": String(on), onclick: function () { var i = S.ids.indexOf(d.k); if (i >= 0) S.ids.splice(i, 1); else S.ids.push(d.k); render(false); }, text: (on ? "✓  " : "") + d.t })); });
+  panel.appendChild(box); panel.appendChild(ph("Which identifiers local policy requires is to be supplied."));
+  panel.appendChild(h("div", { class: "row" }, S.ids.length >= 2 ? h("button", { class: "btn", onclick: function () {
+    var bad = S.ids.indexOf("title") >= 0 || S.ids.indexOf("first") >= 0, ok = !bad && S.ids.indexOf("dob") >= 0 && S.ids.indexOf("num") >= 0;
+    S.out.match = { ok: ok, did: "Relied on: " + IDS.filter(function (d) { return S.ids.indexOf(d.k) >= 0; }).map(function (d) { return d.t.split(":")[0].toLowerCase(); }).join(", ") + ".",
+      why: ok ? "Date of birth and record number do not change when a name does." : "A title or first name can differ between systems for the same person, so neither can confirm or rule out a match. Date of birth and record number can." };
+    render(true); }, text: "Confirm the match" }) : h("span", { class: "small muted", text: "Choose at least two" })));
+}
+function viewCase() {
+  var sc = script(), n = sc.steps.length, st = sc.steps[S.i], panel = h("div", { class: "panel appear" }), line = null;
+  if (!st) {
+    line = sc.endings[endKey()].line;
+    fill(panel, [h("p", { class: "eyebrow", text: "Before " + sc.who + " leaves" }), h("p", { class: "narr", text: "You ask whether there is anything else " + sc.who + " wanted to raise." }),
+      h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { go("cdebrief"); }, text: "See the debrief" }))]);
+  } else {
+    panel.appendChild(h("p", { class: "eyebrow", text: "Step " + (S.i + 1) + " of " + n + " · " + st.title }));
+    if (st.type === "form") formStep(panel, st);
+    else if (st.type === "match") matchStep(panel, st);
+    else if (S.ans[st.id] == null) {
+      if (!S.ord[st.id]) S.ord[st.id] = shuffle(st.options.map(function (o, i) { return i; }));
+      var box = h("div", { class: "options" });
+      S.ord[st.id].forEach(function (oi) { box.appendChild(h("button", { class: "opt", "data-o": String(oi), onclick: function () { S.ans[st.id] = oi; render(true); }, text: st.options[oi].t })); });
+      fill(panel, [h("p", { class: st.slip ? "slipnote" : "narr", text: st.scene }), h("h3", { text: st.q }), facOptions(box, st.id), st.draft ? ph(st.draft) : null]);
+      line = st.patient || null;
+    } else fill(panel, resultBlock(st.options[S.ans[st.id]], "You", nextStep, "Continue"));
+  }
+  var pre = S.kase === "maya" && S.i === 0;
+  return [pre ? null : h("div", { class: "scene pin" }, h("div", { svg: roomSVG(tier(trust()), sc.cast, companionHere()) }), meter()),
+    line ? h("div", { class: "speech appear" }, h("span", { class: "by", text: sc.who }), "“" + line + "”") : null, panel];
+}
+function endKey() { var k = tier(trust()); return S.kase === "maya" && k === "high" && S.ans.third !== 0 ? "pub" : k; }
+var ENDN = { jamie: 3, ash: 3, maya: 4 };
+function viewCaseDebrief() {
+  var sc = script(), key = endKey(), e = sc.endings[key], t = trust(), out = [], clean = true;
+  sc.steps.forEach(function (st) { var o = stepOutcome(st); if (o && (o.d < 0 || o.ok === false)) clean = false; });
+  var passed = S.kase === "maya" && key === "high" && clean;
+  if (!S.counted) { S.counted = true; P.plays[S.kase] = (P.plays[S.kase] || 0) + 1; if (!S.fast || passed) P.done[S.kase] = true; if (S.fast && passed) P.fast = true;
+    (P.ends[S.kase] = P.ends[S.kase] || {})[key] = 1; P.last[S.kase] = { head: e.head, key: key }; persist(); }
+  out.push(h("p", { class: "eyebrow", text: "Debrief · " + sc.who }));
+  out.push(h("h2", { text: e.head }));
+  out.push(h("div", { class: "card " + (key === "pub" ? "mid" : key) }, h("p", { text: e.text }), h("p", { class: "small muted", text: "Trust at the end of the visit: " + word(t) + ". Endings found: " + Object.keys(P.ends[S.kase]).length + " of " + ENDN[S.kase] + "." })));
+  if (S.fast) out.push(h("div", { class: "card " + (passed ? "high" : "mid") }, h("h3", { text: passed ? "Fast track passed" : "Fast track not passed this time" }),
+    h("p", { text: passed ? "The focus clinics are now open on the clinic map." : "The fast track needs trust at ease and no choice that lowered it. Start with Jamie’s case in the Foundation Clinic." })));
+  var km = h("ul", {}); KEYMSG[S.kase].forEach(function (m) { km.appendChild(h("li", { text: m })); });
+  out.push(h("div", { class: "card" }, h("h3", { text: "Four things to take away" }), km));
+  out.push(h("div", { class: "card" }, h("h3", { text: "What was going on" }), h("p", { text: sc.story })));
+  var det = h("details", { class: "card" }, h("summary", { text: "Your " + sc.steps.length + " decisions, step by step" }));
+  sc.steps.forEach(function (st, i) {
+    var o = stepOutcome(st), best = st.type === "choice" ? (S.ans[st.id] === 0 || (st.either && S.ans[st.id] === 1)) : st.type === "match" ? o.ok : o.d > 0;
+    var better = st.type === "choice" ? st.options[0].t : st.type === "form" ? "Turn the screen towards Ash, and ask for each detail before you enter it." : "Rely on date of birth and record number, and never on title or first name.";
+    det.appendChild(h("div", { class: "card" }, h("div", { class: "row" }, h("strong", { text: (i + 1) + ". " + st.title }), st.type === "match" ? h("span", { class: "chip " + (o.ok ? "up" : "down"), text: o.ok ? "✓ Safe check" : "✕ Unsafe check" }) : chip(o.d)),
+      h("p", { text: o.t || o.did }), h("p", { class: "why", text: o.why }),
+      st.either ? h("p", { class: "small" }, h("strong", { text: "No single right answer: " }), "two of these options are defensible, and each has a cost.") : null,
+      best ? null : h("p", { class: "small" }, h("strong", { text: "Stronger option: " }), better)));
+  });
+  out.push(det);
+  var pl = h("ul", {}); sc.phrases.forEach(function (m) { pl.appendChild(h("li", { text: m })); });
+  out.push(h("div", { class: "card" }, h("h3", { text: "Phrases worth keeping" }), pl));
+  out.push(h("div", { class: "card" }, h("h3", { text: "References" }), ph("References and guidelines to be supplied by the clinical lead."), usNote()));
+  out.push(h("div", { class: "row" },
+    h("button", { class: "btn", onclick: function () { startCase(S.kase, S.fast); }, text: "Play again for another ending" }),
+    h("button", { class: "btn ghost", onclick: function () { go(S.fast ? "map" : "clinic"); }, text: S.fast ? "Clinic map" : "Back to the clinic" }),
+    h("button", { class: "btn ghost", onclick: function () { go("summary"); }, text: "Your summary" })));
+  out.push(draftNote());
+  return out;
+}
+function nextCase() { var r = null; clinic("foundation").cases.forEach(function (x) { if (!r && !P.done[x.k]) r = x; }); return r; }
+function handoverBtn(c) {
+  if (c.k !== "foundation") return null;
+  var n = c.cases.filter(function (x) { return P.last[x.k]; }).length;
+  return n ? h("div", { class: "row" }, h("button", { class: "btn ghost", onclick: function () { go("handover"); }, text: "End-of-clinic handover (" + n + " of " + c.cases.length + " seen)" })) : null;
+}
+function viewHandover() {
+  var c = clinic("foundation"), grid = h("div", { class: "hand" });
+  c.cases.forEach(function (x) { var l = P.last[x.k];
+    grid.appendChild(h("div", { class: "card " + (l ? (l.key === "pub" ? "mid" : l.key) : "") }, h("p", { class: "small muted", text: x.time + " · " + x.who }), h("h3", { text: l ? l.head : "Not seen yet" }),
+      h("p", { class: "small", text: l ? "Endings found: " + Object.keys(P.ends[x.k] || {}).length + " of " + ENDN[x.k] : x.what }))); });
+  return [h("button", { class: "plain link", onclick: function () { go("clinic"); }, text: "← Foundation Clinic" }), h("h2", { text: "End-of-clinic handover" }),
+    h("p", { text: "How each visit ended the last time you ran it. Replay a case to change what you hand over." }), grid,
+    h("div", { class: "card" }, h("h3", { text: "Carried forward" }), h("p", { text: "Jamie is booked into Hormone management. How today went will shape that visit." }), ph("The returning-patient storyline will be built with the hormone management cases.")),
+    h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { go("map"); }, text: "Clinic map" }))];
+}
+function startCase(k, fast) { var keep = S.clinic; S = fresh(); S.clinic = fast ? "foundation" : keep; S.kase = k; S.fast = !!fast; go(isFac() ? (k === "jamie" ? "chart" : "case") : "brief"); }
+function findCase(k) { var r = null; CLINICS.forEach(function (c) { c.cases.forEach(function (x) { if (x.k === k) r = x; }); }); return r; }
+function viewBrief() {
+  var x = findCase(S.kase), jam = S.kase === "jamie";
+  return [h("button", { class: "plain link", onclick: function () { go(S.fast ? "map" : "clinic"); }, text: "← " + (S.fast ? "Clinic map" : clinic(S.clinic).name) }),
+    h("p", { class: "eyebrow", text: (S.fast ? "Fast track" : x.time) + " · before you start" }), h("h2", { text: x.who + ": " + x.what.toLowerCase() }),
+    h("div", { class: "panel" },
+      h("p", {}, h("strong", { text: "About " + x.mins + " minutes. " }), x.note + " The patient is fictional."),
+      h("p", { class: "small muted", text: "In this case you will practise how to:" }), (function () { var ul = h("ul", {}); x.aims.forEach(function (a) { ul.appendChild(h("li", { text: a.charAt(0).toLowerCase() + a.slice(1) })); }); return ul; })(),
+      h("p", { text: seenBefore() ? "You have played this case before, so the reasoning now appears after each choice." : "On your first play you will see how " + x.who + " reacts to each choice. The reasoning comes in the debrief at the end." }),
+      S.fast ? h("p", { text: "Fast track: finish with trust at ease and no choice that lowers it, and the focus clinics open." }) : null,
+      h("p", { text: "Everything can be done by tapping or with the keyboard." }),
+      h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { go(jam ? "chart" : "case"); }, text: jam ? "Open the chart" : "Begin" }))),
+    usNote()];
+}
+function caseProgress() {
+  if (S.kase === "jamie") return (S.view === "chart" ? 0 : S.view === "waiting" ? 1 : 2 + S.phase) / 9;
+  return S.i / (script().steps.length + 1);
+}
+function clockNow(x, f) { var p = x.time.split(":"), m = (+p[0]) * 60 + (+p[1]) + Math.round(x.mins * f); return ("0" + Math.floor(m / 60)).slice(-2) + ":" + ("0" + (m % 60)).slice(-2); }
+function progBar() {
+  var x = findCase(S.kase), f = caseProgress(), left = Math.max(1, Math.ceil(x.mins * (1 - f)));
+  var top = S.leaving ? h("div", { class: "row between" }, h("span", { class: "small", text: "Leave this case? Your progress in it will be lost." }),
+      h("span", { class: "row" }, h("button", { class: "btn ghost", onclick: function () { S.leaving = false; go(isFac() ? "session" : S.fast ? "map" : "clinic"); }, text: "Leave" }), h("button", { class: "btn", onclick: function () { S.leaving = false; render(false); }, text: "Stay" })))
+    : h("div", { class: "row between" }, h("span", { class: "row" }, h("button", { class: "plain link", onclick: function () { S.leaving = true; render(false); }, text: "\u2190 Leave case" }), isFac() ? h("button", { class: "plain link", onclick: rewind, text: "\u21BA Back one step" }) : null),
+      h("span", { class: "small muted", text: x.who + " · clinic clock " + clockNow(x, f) + " \u00B7 about " + left + " min left" + (isFac() && FAC.t0 ? " \u00B7 session " + Math.round((Date.now() - FAC.t0) / 60000) + " min" : "") }));
+  return h("div", { class: "prog" }, top,
+    h("div", { class: "track", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(Math.round(f * 100)), "aria-label": "Progress through this case" }, h("div", { class: "fill", style: "width:" + Math.max(3, Math.round(f * 100)) + "%" })));
+}
+/* ---------- facilitator mode ---------- */
+var FAC = { queue: [], i: 0, t0: null };
+var FACQ = {
+  jamie: { c1: "Where in the chart was his name? What stops us checking before we call someone?", intro: "Is it awkward to confirm a name and pronouns that are already on the chart? Why do it anyway?", label: "What makes an apology land? When does an apology become about us?",
+    probe: "Jamie said five things at once. How did we decide what mattered?", rx: "How do we stay honest about what a system cannot change, without closing the conversation?", c4: "Who else sees a patient’s post, texts and voicemails? What should we ask before we send anything?" },
+  ash: { intro: "The form had no space for pronouns. Whose job is it to ask?", form: "What does a patient learn about a service from its forms?", sex: "How do we explain a field we did not design and cannot change?",
+    sign: "What makes a sensitive question feel safe to answer?", rel: "How do we tell clinical need from curiosity?" },
+  maya: { match: "Which details stay the same when someone changes their name?", slip: "We all slip. What does a good recovery sound like, and who is it for?", lab: "Whose job is it to fix a record that is wrong?",
+    third: "Two of these options are defensible. What does each one cost Maya?", ask: "What should a patient hear before a personal question?" }
+};
+var FOCUS = { jamie: ["c1", "rx", "c4"], ash: ["sex", "sign"], maya: ["slip", "third"] };
+var JSTORY = "The pharmacy reads the name on the prescription aloud at the counter, so Jamie has been putting off collecting it. The chart showed it twice: late and uncollected prescriptions, and a testosterone level that had fallen since August.";
+function isFac() { return P.mode === "fac"; }
+function facQ(key) { var q = (FACQ[S.kase] || {})[key]; return q ? h("p", { class: "facq" }, h("strong", { text: "Ask the room: " }), q) : null; }
+function whyEl(text) {
+  if (isFac()) return h("details", { class: "whyd" }, h("summary", { text: "Reveal the reasoning" }), h("p", { class: "why", text: text }));
+  return seenBefore() ? h("p", { class: "why", text: text }) : null;
+}
+function facOptions(box, key) {
+  if (!isFac()) return box;
+  S.rev = S.rev || {}; S.votes = S.votes || {};
+  if (!S.rev[key]) return h("div", { class: "facask" }, h("p", { class: "facq" }, h("strong", { text: "Before showing any options: " }), "what would you say or do here? Take two or three answers from the room."),
+    h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { S.rev[key] = true; render(false); }, text: "Reveal the options" })));
+  var v = S.votes[key] = S.votes[key] || {}, wrap = h("div", { class: "options" });
+  wrap.appendChild(h("p", { class: "small muted", text: "Count hands for each option, then choose the one the room wants to play." }));
+  Array.prototype.slice.call(box.children).forEach(function (btn) {
+    var id = btn.getAttribute("data-o");
+    if (id == null) { wrap.appendChild(btn); return; }
+    wrap.appendChild(h("div", { class: "voterow" }, btn, h("button", { class: "vote", "aria-label": "Add one hand for this option", onclick: function () { v[id] = (v[id] || 0) + 1; render(false); }, text: (v[id] || 0) + " hands +" })));
+  });
+  return wrap;
+}
+function rewind() {
+  if (S.kase === "jamie") {
+    if (S.view === "waiting") { if (S.c1) S.c1 = null; else S.view = "chart"; }
+    else if (S.view === "room") {
+      var undo = [function () { if (S.intro != null) { S.intro = null; return 1; } }, function () { if (S.label != null) { S.label = null; return 1; } },
+        function () { if (S.labelDone || S.labelOpen) { S.labelDone = false; S.labelOpen = false; return 1; } }, function () { if (S.probed || S.probes.length) { S.probed = false; S.probes = []; return 1; } },
+        function () { if (S.rx != null) { S.rx = null; return 1; } }, function () { if (S.c4) { S.c4 = null; return 1; } }];
+      if (S.phase >= 6) { S.phase = 5; S.c4 = null; }
+      else if (!undo[S.phase]()) { if (S.phase === 0) { S.view = "waiting"; S.c1 = null; } else { S.phase--; undo[S.phase](); } }
+    }
+  } else {
+    var st = script().steps;
+    if (S.i >= st.length) S.i = st.length - 1; else if (stepOutcome(st[S.i]) == null && S.i > 0) S.i--;
+    var id = st[S.i].id; delete S.ans[id]; delete S.out[id];
+    if (id === "match") S.ids = [];
+    if (id === "form") { S.form = { name: -1, title: -1, pron: -1 }; S.fasked = {}; S.turned = false; }
+  }
+  render(true);
+}
+function facCases() { return clinic("foundation").cases; }
+function viewSession() {
+  P.sel = P.sel || { jamie: true, ash: true, maya: true };
+  var list = h("div", { class: "panel sheet" }), total = 5, plan = h("ol", { class: "how" }, h("li", { text: "Pre-brief: ground rules and content notes (about 5 minutes)" })), n = 0;
+  facCases().forEach(function (x) {
+    var on = !!P.sel[x.k];
+    if (on) { n++; total += x.mins + 20; plan.appendChild(h("li", { text: x.who + ": play the case together (about " + (x.mins + 5) + " minutes), then the Diamond debrief (about 15 minutes)" })); }
+    list.appendChild(h("button", { class: "slot open" + (on ? " done" : ""), "aria-pressed": String(on), onclick: function () { P.sel[x.k] = !on; persist(); render(false); } },
+      h("span", { class: "time", text: on ? "✓" : "+" }), h("span", {}, h("strong", { text: x.who }), h("br"), h("span", { class: "small", text: x.what })), h("span", { class: "tag end", text: on ? "In this session" : "Tap to add" })));
+  });
+  plan.appendChild(h("li", { text: "Close: key messages from every case played" }));
+  return [h("div", { class: "row between" }, h("button", { class: "plain", "aria-label": "Back to the title screen", onclick: function () { go("title"); }, svg: logoSVG(44) }), h("span", { class: "pill req", text: "Facilitator mode" })),
+    h("h2", { text: "Plan a session" }),
+    h("p", { text: "Choose the cases for this class. Every case is open, the room decides together, and nothing the class does is recorded." }),
+    list,
+    h("div", { class: "card" }, h("h3", { text: n ? "This session: about " + total + " minutes" : "Choose at least one case" }), n ? plan : null),
+    h("div", { class: "card" }, h("h3", { text: "How the debrief is structured" }), h("p", { text: "Each case ends with a group debrief in three phases, following the Diamond model: description (what happened), analysis (why it went that way) and application (what we take into practice)." }), ph("Check the phase wording against the published Diamond model before use.")),
+    h("div", { class: "row" }, n ? h("button", { class: "btn big", onclick: function () { FAC.queue = facCases().filter(function (x) { return P.sel[x.k]; }).map(function (x) { return x.k; }); FAC.i = 0; FAC.t0 = Date.now(); go("prebrief"); }, text: "Start with the pre-brief" }) : null,
+      h("button", { class: "btn ghost", onclick: function () { P.mode = "solo"; persist(); go("map"); }, text: "Switch to learning on my own" })),
+    draftNote()];
+}
+function viewPrebrief() {
+  var rules = ["This is a practice space. The patients are fictional and the situations are realistic.", "We decide together. No one is put on the spot.", "Some choices will go badly on purpose. That is where the learning is.",
+    "People in this room may be trans or non-binary, or close to someone who is. Speak with that in mind.", "Step out if you need to. What is said in the room stays in the room."];
+  var ul = h("ul", { class: "how" }), notes = h("ul", {});
+  rules.forEach(function (r) { ul.appendChild(h("li", { text: r })); });
+  FAC.queue.forEach(function (k) { var x = findCase(k); notes.appendChild(h("li", {}, h("strong", { text: x.who + ": " }), x.note)); });
+  return [h("p", { class: "eyebrow", text: "Facilitator mode · pre-brief" }), h("h2", { text: "Before we start" }), h("div", { class: "panel" }, ul),
+    h("div", { class: "card" }, h("h3", { text: "What today’s cases involve" }), notes), ph("Pre-brief wording drafted for review."),
+    h("div", { class: "row" }, h("button", { class: "btn big", onclick: function () { startCase(FAC.queue[0], false); }, text: "Begin: " + findCase(FAC.queue[0]).who }), h("button", { class: "btn ghost", onclick: function () { go("session"); }, text: "Back to the plan" }))];
+}
+function decisions() {
+  if (S.kase === "jamie") { var io = introOptions(); return [
+    { key: "c1", title: "The waiting room", o: CALLS[S.c1], pick: S.c1 }, { key: "intro", title: "Introductions", o: io[S.intro], pick: S.intro }, { key: "label", title: "The label", o: TALK.label.options[S.label], pick: S.label },
+    { key: "probe", title: "What to follow up", o: probeOutcome() }, { key: "rx", title: "The prescription", o: TALK.rx.options[S.rx], pick: S.rx }, { key: "c4", title: "The record", o: recOutcome() }]; }
+  return script().steps.map(function (st) { return { key: st.id, title: st.title, o: stepOutcome(st), pick: S.ans[st.id], either: st.either, match: st.type === "match" }; });
+}
+function endInfo() { return S.kase === "jamie" ? { who: "Jamie", e: ENDINGS[tier(trust())], story: JSTORY } : { who: script().who, e: script().endings[endKey()], story: script().story }; }
+function viewFDebrief() {
+  var ph3 = ["Description", "Analysis", "Application"], p = S.dp || 0, info = endInfo(), ds = decisions(), out = [];
+  var bar = h("div", { class: "phase" }); ph3.forEach(function (t, i) { bar.appendChild(h("span", { class: i === p ? "on" : "", text: (i + 1) + ". " + t })); });
+  out.push(h("p", { class: "eyebrow", text: "Group debrief · " + info.who })); out.push(bar);
+  if (p === 0) {
+    var ol = h("ol", { class: "how" }); ds.forEach(function (d) { ol.appendChild(h("li", {}, h("strong", { text: d.title + ": " }), d.o.t || d.o.did)); });
+    out.push(h("h2", { text: "What happened?" }));
+    out.push(h("p", { class: "facq" }, h("strong", { text: "Ask the room: " }), "Describe this visit in a few sentences. Stick to what happened; we will come to why."));
+    out.push(h("div", { class: "panel" }, h("p", { class: "small muted", text: "The path the room chose" }), ol, h("p", {}, h("strong", { text: "How it ended: " }), info.e.head)));
+  } else if (p === 1) {
+    out.push(h("h2", { text: "Why did it go that way?" }));
+    out.push(h("details", { class: "card" }, h("summary", { text: "What was going on for " + info.who }), h("p", { text: info.story })));
+    var rest = h("details", { class: "card" }, h("summary", { text: "The other decisions" })), focus = FOCUS[S.kase] || [];
+    ds.forEach(function (d) {
+      var v = (S.votes || {})[d.key] || {}, tot = 0; Object.keys(v).forEach(function (k) { tot += v[k]; });
+      var card = h("div", { class: "card" }, h("div", { class: "row" }, h("strong", { text: d.title }), d.match ? h("span", { class: "chip " + (d.o.ok ? "up" : "down"), text: d.o.ok ? "✓ Safe check" : "✕ Unsafe check" }) : chip(d.o.d)),
+        h("p", { text: d.o.t || d.o.did }), tot ? h("p", { class: "small muted", text: "Hands counted: " + (v[String(d.pick)] || 0) + " for this option, " + tot + " in all." }) : null,
+        facQ(d.key), d.either ? h("p", { class: "small" }, h("strong", { text: "No single right answer: " }), "two of the options are defensible, and each has a cost.") : null,
+        h("details", { class: "whyd" }, h("summary", { text: "Reveal the reasoning" }), h("p", { class: "why", text: d.o.why })));
+      if (focus.indexOf(d.key) >= 0) out.push(card); else rest.appendChild(card);
+    });
+    out.push(rest);
+  } else {
+    var km = h("ul", { class: "how" }), pl = h("ul", {});
+    KEYMSG[S.kase].forEach(function (m) { km.appendChild(h("li", { text: m })); });
+    (S.kase === "jamie" ? ["“Jamie, he/him: have I got that right?”", "“I’m sorry about that. I’ll correct it today.”", "“Which name should go on letters to your home?”"] : script().phrases).forEach(function (m) { pl.appendChild(h("li", { text: m })); });
+    out.push(h("h2", { text: "What will we take into practice?" }));
+    out.push(h("p", { class: "facq" }, h("strong", { text: "Ask the room: " }), "What is one thing you will say or do differently on your next shift? Which of these will be hardest on a busy day?"));
+    out.push(h("div", { class: "panel" }, h("h3", { text: "Key messages" }), km)); out.push(h("div", { class: "card" }, h("h3", { text: "Phrases worth keeping" }), pl));
+    out.push(h("div", { class: "card" }, h("h3", { text: "References" }), ph("References and guidelines to be supplied by the clinical lead.")));
+  }
+  var last = FAC.i >= FAC.queue.length - 1, nav = h("div", { class: "row" });
+  if (p > 0) nav.appendChild(h("button", { class: "btn ghost", onclick: function () { S.dp = p - 1; render(true); }, text: "← " + ph3[p - 1] }));
+  if (p < 2) nav.appendChild(h("button", { class: "btn big", onclick: function () { S.dp = p + 1; render(true); }, text: "Next: " + ph3[p + 1] + " →" }));
+  else if (!last && FAC.queue.length) nav.appendChild(h("button", { class: "btn big", onclick: function () { FAC.i++; startCase(FAC.queue[FAC.i], false); }, text: "Next case: " + findCase(FAC.queue[FAC.i + 1]).who + " →" }));
+  else nav.appendChild(h("button", { class: "btn big", onclick: function () { go("fclose"); }, text: "Close the session" }));
+  nav.appendChild(h("button", { class: "btn ghost", onclick: function () { startCase(S.kase, false); }, text: "Replay this case" }));
+  out.push(nav); return out;
+}
+function viewFClose() {
+  var out = [h("p", { class: "eyebrow", text: "Facilitator mode · close" }), h("h2", { text: "What we take away" })];
+  (FAC.queue.length ? FAC.queue : ["jamie"]).forEach(function (k) { var ul = h("ul", {}); KEYMSG[k].forEach(function (m) { ul.appendChild(h("li", { text: m })); }); out.push(h("div", { class: "card" }, h("h3", { text: findCase(k).who }), ul)); });
+  out.push(h("p", { class: "facq" }, h("strong", { text: "To finish: " }), "one word from each person on how they are leaving the session."));
+  out.push(h("div", { class: "row" }, h("button", { class: "btn", onclick: function () { go("session"); }, text: "Plan another session" }), h("button", { class: "btn ghost", onclick: function () { go("title"); }, text: "Title screen" })));
+  return out;
+}
+function render(scroll) {
+  var app = document.getElementById("app"), views = { title: viewTitle, map: viewMap, clinic: viewClinic, brief: viewBrief, summary: viewSummary, how: viewHow, handover: viewHandover, session: viewSession, prebrief: viewPrebrief, fdebrief: viewFDebrief, fclose: viewFClose, "case": viewCase, cdebrief: viewCaseDebrief, chart: viewChart, waiting: viewWaiting, room: viewRoom, debrief: viewDebrief };
+  if (!views[S.view]) S.view = "title";
+  var parts = views[S.view]();
+  app.style.setProperty("--clinic", (clinic(S.clinic) || CLINICS[0]).color);
+  app.classList.toggle("fac", isFac() && S.view !== "title");
+  app.textContent = "";
+  if (["chart", "waiting", "room", "case"].indexOf(S.view) >= 0) app.appendChild(progBar());
+  parts.forEach(function (p) { if (p) app.appendChild(p); });
+  if (scroll) { window.scrollTo(0, 0); app.classList.remove("enter"); void app.offsetWidth; app.classList.add("enter"); }
+  var inCase = ["chart", "waiting", "room", "case"].indexOf(S.view) >= 0;
+  try { if (inCase) localStorage.setItem("clinicday.s", JSON.stringify(S)); else localStorage.removeItem("clinicday.s"); } catch (e) {}
+  var live = document.getElementById("live"), now = inCase ? trust() : null;
+  if (live && inCase && lastTrust != null && now !== lastTrust) live.textContent = (now > lastTrust ? "Trust went up. " : "Trust went down. ") + "The patient now seems " + word(now).toLowerCase() + ".";
+  lastTrust = now;
+}
+var lastTrust = null;
+function start(data) {
+  S = fresh();
+  if (data && data.view && data.pins && data.orders && data.orders.intro) S = data;
+  else { try { var keep = JSON.parse(localStorage.getItem("clinicday.s") || "null"); if (keep && keep.view && keep.pins && keep.ans) S = keep; else if (Object.keys(P.plays).length) S.view = "map"; } catch (e) {} }
+  render(false);
+}
+var hot = window.claude && window.claude.hot;
+if (hot && hot.snapshot) hot.snapshot(function () { return S; });
+if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
+</script>
+</body>
+</html>
